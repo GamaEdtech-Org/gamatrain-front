@@ -3,12 +3,19 @@
     <v-row class="justify-center">
       <div class="w-100 d-flex justify-center flex-wrap top-info-div">
         <CommonFilterList
+          :key="activeCategory"
           :filter-list="filters"
           :count-data-found="totalDataFind"
           :loading="isInitialDataLoading"
           has-keyword-search
+          sticky-content
           @change-filter="changeFilter"
         >
+          <template #after-inline-filters>
+            <div class="w-100 d-flex align-start justify-start max-width-container">
+              <CommonDetailSubjectDirectoryNav :content-data="data[0]" />
+            </div>
+          </template>
           <div
             class="w-100 d-flex flex-column align-start ga-2 px-2 max-width-container"
           >
@@ -17,9 +24,6 @@
             </h1>
           </div>
         </CommonFilterList>
-      </div>
-      <div class="w-100 d-flex align-start justify-start px-2 max-width-container">
-        <CommonDetailSubjectDirectoryNav :content-data="data[0]" />
       </div>
 
       <search-list
@@ -80,6 +84,8 @@ const getEquivalentNewType = (type) => {
       return 'tutorial'
     case 'paper':
       return 'paper'
+    case 'study-materials':
+      return 'study-materials'
     case 'multimedia':
       return 'multimedia'
     case 'quizhub':
@@ -97,6 +103,8 @@ const getEquivalentNewType = (type) => {
 const getEquivalentOldType = (type) => {
   switch (type) {
     case 'paper':
+      return 'test'
+    case 'study-materials':
       return 'test'
     case 'multimedia':
       return 'learnfiles'
@@ -123,23 +131,60 @@ const getEquivalentOldType = (type) => {
   }
 }
 
+const activeCategory = computed(() => getEquivalentNewType(route.query.type))
+
+const buildSearchParams = (query, page, perpage) => {
+  const frontendType = getEquivalentNewType(query.type)
+  const params = {
+    page,
+    perpage,
+    title: query.title,
+    section: query.section,
+    base: query.base,
+    lesson: query.lesson,
+    type: getEquivalentOldType(frontendType),
+  }
+
+  if (frontendType === 'paper') {
+    params.is_paper = true
+    params.test_type = query.test_type
+    params.variant = query.variant
+    params.edu_year = query.edu_year
+    params.edu_month = query.edu_month
+  }
+  else if (frontendType === 'study-materials') {
+    params.is_paper = false
+    params.test_type = query.test_type
+    params.topic = query.topic
+  }
+  else if (frontendType === 'quizhub') {
+    params.exam_type = query.exam_type
+    params.topic = query.topic
+    params.edu_year = query.edu_year
+    params.edu_month = query.edu_month
+  }
+  else if (frontendType === 'tutorial') {
+    params.topic = query.topic
+  }
+  else if (frontendType === 'multimedia') {
+    params.content_type = query.content_type
+  }
+  else {
+    params.topic = query.topic
+    params.test_type = query.test_type
+    params.content_type = query.content_type
+    params.edu_year = query.edu_year
+    params.edu_month = query.edu_month
+  }
+
+  return params
+}
+
 const querySearch = ref({
-  title: route.query.title,
-  section: route.query.section,
-  base: route.query.base,
-  lesson: route.query.lesson,
-  topic: route.query.topic,
+  ...route.query,
   type: getEquivalentNewType(route.query.type),
-  edu_year: route.query.edu_year,
-  edu_month: route.query.edu_month,
   page: Number(route.query.page) || 1,
 })
-if (route.query.type && getEquivalentOldType(route.query.type) == 'learnfiles') {
-  querySearch.value.content_type = route.query.content_type
-}
-if (route.query.type && getEquivalentOldType(route.query.type == 'test')) {
-  querySearch.value.test_type = route.query.test_type
-}
 const isInitialDataLoading = ref(false)
 const isPaginationDataLoading = ref(false)
 const isPreviousLoading = ref(false)
@@ -189,25 +234,7 @@ const { data: initialData, pending: _loadingDataServer } = await useAsyncData(
       return useApiService.get('/api/v2/identities/profiles/list', query)
     }
     else {
-      const params = {
-        page: pageNumber,
-        title: route.query.title,
-        section: route.query.section,
-        base: route.query.base,
-        lesson: route.query.lesson,
-        topic: route.query.topic,
-        type: getEquivalentOldType(route.query.type),
-        edu_year: route.query.edu_year,
-        edu_month: route.query.edu_month,
-        perpage: perPageServerSide,
-      }
-
-      if (route.query.type && getEquivalentOldType(route.query.type) == 'learnfiles') {
-        params.content_type = route.query.content_type
-      }
-      if (route.query.type && getEquivalentOldType(route.query.type) == 'test') {
-        params.test_type = route.query.test_type
-      }
+      const params = buildSearchParams(route.query, pageNumber, perPageServerSide)
 
       return useApiService.get('/api/v1/search', params, { public: true })
     }
@@ -248,7 +275,7 @@ const getDataList = async () => {
       totalDataFind.value = response.data.totalRecordsCount || 0
     }
     else {
-      const params = { ...querySearch.value, type: typeRoute }
+      const params = buildSearchParams(querySearch.value, querySearch.value.page, perPage)
       response = await useApiService.get('/api/v1/search', params)
       totalDataFind.value = response.data.num || 0
     }
@@ -376,242 +403,234 @@ const specialMonths = {
     { id: 11, title: 'November' },
   ],
 }
-const FILTER_INDEX = {
-  Board: 0,
-  Grade: 1,
-  Subject: 2,
-  Topic: 3,
-  Services: 4,
-  Classification: 5,
-  Year: 6,
-  Month: 7,
-}
-const filters = [
-  {
-    selectedItem: null,
-    title: 'Board',
-    disabled: false,
-    hasSearch: true,
-    refElement: null,
-    api: '/api/v2/boards',
-    idInParams: false,
-    queryKey: 'section',
-    children: [FILTER_INDEX.Grade, FILTER_INDEX.Classification],
-    closable: true,
-  },
-  {
-    selectedItem: null,
-    title: 'Grade',
-    disabled: true,
-    hasSearch: true,
-    refElement: null,
-    api: '/api/v1/types/list',
-    idInParams: false,
-    extraApiParams: {
-      type: `base`,
-    },
-    dependencies: [
-      { parent: FILTER_INDEX.Board, targetKey: 'section_id', sourceKey: 'code' },
-    ],
-    queryKey: 'base',
-    children: [FILTER_INDEX.Subject],
-    childrenForGetStaticData: [FILTER_INDEX.Month],
-    closable: true,
-  },
-  {
-    selectedItem: null,
-    title: 'Subject',
-    disabled: true,
-    hasSearch: true,
-    refElement: null,
-    api: '/api/v1/types/list',
-    idInParams: false,
-    extraApiParams: {
-      type: `lesson`,
-    },
-    dependencies: [
-      { parent: FILTER_INDEX.Grade, targetKey: 'base_id', sourceKey: 'id' },
-    ],
-    queryKey: 'lesson',
-    children: [FILTER_INDEX.Topic],
-    closable: true,
-  },
-  {
-    selectedItem: null,
-    title: 'Topic',
-    disabled: true,
-    hasSearch: true,
-    refElement: null,
-    api: '/api/v1/types/list',
-    idInParams: false,
-    extraApiParams: {
-      type: `topic`,
-    },
-    dependencies: [
-      { parent: FILTER_INDEX.Subject, targetKey: 'lesson_id', sourceKey: 'id' },
-    ],
-    queryKey: 'topic',
-    children: [],
-    closable: true,
-  },
-  {
-    selectedItem: null,
-    title: 'Services',
-    disabled: false,
-    hasSearch: false,
-    refElement: null,
-    api: null,
-    idInParams: false,
-    extraApiParams: {},
-    dependencies: [],
-    staticList: [
-      {
-        title: 'Past Papers',
-        id: 'paper',
-        contentIcon: 'stat-icon icon-paper',
-        color: '#2e90fa',
-        idClassification: 'test_type',
-      },
-      {
-        title: 'Multimedia',
-        id: 'multimedia',
-        contentIcon: 'stat-icon icon-multimedia',
-        color: '#02b719',
-        idClassification: 'content_type',
-      },
-      {
-        title: 'QuizHub',
-        id: 'quizhub',
-        contentIcon: 'stat-icon icon-exam',
-        color: '#7c4dff',
-        idClassification: 'test_type',
-      },
-      {
-        title: 'Forum',
-        id: 'forum',
-        contentIcon: 'stat-icon icon-q-a',
-        color: '#fdb022',
-        idClassification: null,
-      },
-      {
-        title: 'Tutorial',
-        id: 'tutorial',
-        contentIcon: 'stat-icon icon-tutorial',
-        color: '#2e90fa',
-        idClassification: null,
-      },
-      {
-        title: 'Teacher',
-        id: 'teacher',
-        contentIcon: 'stat-icon icon-teacher',
-        color: '#12b76a',
-        idClassification: null,
-      },
-    ],
-    queryKey: 'type',
-    disableOtherFiltersOnSelectedIds: ['teacher'],
-    children: [
-      FILTER_INDEX.Classification,
-      FILTER_INDEX.Year,
-      FILTER_INDEX.Month,
-    ],
-    closable: false,
-    defaultValue: {
-      title: 'Past Papers',
-      id: 'paper',
-      contentIcon: 'stat-icon icon-paper',
-      color: '#2e90fa',
-      idClassification: 'test_type',
-    },
-  },
-  {
-    selectedItem: null,
-    title: 'Classification',
-    disabled: true,
-    hasSearch: true,
-    refElement: null,
-    api: '/api/v1/types/list',
-    idInParams: false,
-    extraApiParams: {},
-    dependencies: [
-      { parent: FILTER_INDEX.Board, targetKey: 'section_id', sourceKey: 'code' },
-      {
-        parent: FILTER_INDEX.Services,
-        targetKey: 'type',
-        sourceKey: 'idClassification',
-        disableIds: ['dars', 'question', 'tutorial', 'forum'],
-      },
-    ],
-    queryMap: {
-      test: 'test_type',
-      azmoon: 'test_type',
-      learnfiles: 'content_type',
-      paper: 'test_type',
-      quizhub: 'test_type',
-      multimedia: 'content_type',
-    },
-    parentIndexChangeQueryKey: FILTER_INDEX.Services,
-    queryKey: 'test_type',
-    children: [],
-    closable: true,
-  },
-  {
-    selectedItem: null,
-    title: 'Year',
-    disabled: true,
-    hasSearch: true,
-    refElement: null,
-    api: null,
-    idInParams: false,
-    extraApiParams: {},
-    dependencies: [
-      {
-        parent: FILTER_INDEX.Services,
-        targetKey: 'type',
-        sourceKey: 'id',
-        disableIds: ['learnfiles', 'dars', 'question', 'multimedia', 'tutorial', 'forum'],
-      },
-    ],
-    staticList: Array.from({ length: 14 }, (_, i) => 2013 + i)
-      .reverse()
-      .map(year => ({
-        title: `${year}`,
-        id: year,
-      })),
-    queryKey: 'edu_year',
-    closable: true,
-    children: [],
-  },
-  {
-    selectedItem: null,
-    title: 'Month',
-    disabled: true,
-    hasSearch: true,
-    refElement: null,
-    api: null,
-    idInParams: false,
-    extraApiParams: {},
-    dependencies: [
-      {
-        parent: FILTER_INDEX.Services,
-        targetKey: 'type',
-        sourceKey: 'id',
-        disableIds: ['learnfiles', 'dars', 'question', 'multimedia', 'tutorial', 'forum'],
-      },
-    ],
-    staticList: [],
-    dependenciesForGetStaticData: [FILTER_INDEX.Grade],
-    getStaticList: (id = route.query.base) => {
-      const gradeId = id ? id : route.query.base
-      return gradeId && specialMonths[gradeId]
-        ? specialMonths[gradeId]
-        : allMonths
-    },
-    queryKey: 'edu_month',
-    closable: true,
-    children: [],
-  },
+const categoryOptions = [
+  { title: 'Past Papers', id: 'paper', contentIcon: 'stat-icon icon-paper', color: '#2e90fa' },
+  { title: 'Study Materials', id: 'study-materials', icon: '/images/study-materials.svg', iconPadding: 3, color: 'rgb(18, 183, 106)' },
+  { title: 'Exam Hub', id: 'quizhub', contentIcon: 'stat-icon icon-exam', color: '#7c4dff' },
+  { title: 'Tutorial', id: 'tutorial', contentIcon: 'stat-icon icon-tutorial', color: '#2e90fa' },
 ]
+
+const defaultCategory = categoryOptions[0]
+
+const makeFilter = overrides => ({
+  selectedItem: null,
+  disabled: false,
+  hasSearch: true,
+  refElement: null,
+  api: null,
+  idInParams: false,
+  extraApiParams: {},
+  dependencies: [],
+  children: [],
+  closable: true,
+  boxed: true,
+  ...overrides,
+})
+
+const BOARD_ICON_BY_TITLE = {
+  Cambridge: 'CIE',
+  Edexcel: 'Edexcel',
+  AQA: 'AQA',
+  OCR: 'OCR',
+  GAMA: 'GAMA',
+  CXC: 'CXC',
+  Nigerian: 'Nijeria',
+}
+
+const enrichBoardsWithIcons = async (boards) => {
+  try {
+    const response = await useApiService.get('/api/v2/boards', undefined, { public: true })
+    const boardByCode = new Map(
+      (response.data || []).map(board => [String(board.code), board]),
+    )
+
+    return boards.map((board) => {
+      const v2Board = boardByCode.get(String(board.code))
+      return {
+        ...board,
+        apiIcon: v2Board?.icon || null,
+        icon: BOARD_ICON_BY_TITLE[v2Board?.title || board.title] || null,
+      }
+    })
+  }
+  catch {
+    return boards.map(board => ({
+      ...board,
+      icon: BOARD_ICON_BY_TITLE[board.title] || null,
+    }))
+  }
+}
+
+const filters = computed(() => {
+  const category = activeCategory.value
+  const conditionalFilters = {
+    paper: ['year', 'session', 'paper', 'variant'],
+    'study-materials': ['material', 'topic'],
+    quizhub: ['topic', 'year', 'session', 'exam-type'],
+    tutorial: ['topic'],
+  }[category] || []
+
+  const index = {
+    board: 0,
+    level: 1,
+    subject: 2,
+    category: 3,
+  }
+  conditionalFilters.forEach((name, offset) => {
+    index[name] = offset + 4
+  })
+
+  const boardChildren = [index.level]
+  if (index.paper !== undefined) boardChildren.push(index.paper)
+  if (index.material !== undefined) boardChildren.push(index.material)
+  const subjectChildren = index.topic === undefined ? [] : [index.topic]
+  const categoryChildren = conditionalFilters.map(name => index[name])
+
+  const result = [
+    makeFilter({
+      title: 'Board',
+      api: '/api/v1/types/list',
+      extraApiParams: { type: 'section' },
+      itemTransform: item => ({ ...item, code: item.id }),
+      listTransform: enrichBoardsWithIcons,
+      itemSort: (a, b) => Number(a.list_order) - Number(b.list_order),
+      showItemIcon: true,
+      iconSrc: item => `/images/boards/${item.icon}.svg`,
+      fallbackIcon: 'md:school',
+      fallbackIconSrc: '/images/board-fallback.svg',
+      emptyFallbackIconSrc: '/images/board-control-fallback.svg',
+      fallbackIconPadding: 4,
+      unselectedIconColor: '#000000',
+      queryKey: 'section',
+      children: boardChildren,
+    }),
+    makeFilter({
+      title: 'Level',
+      disabled: true,
+      api: '/api/v1/types/list',
+      extraApiParams: { type: 'base' },
+      dependencies: [{ parent: index.board, targetKey: 'section_id', sourceKey: 'code' }],
+      queryKey: 'base',
+      children: [index.subject],
+      childrenForGetStaticData: index.session === undefined ? [] : [index.session],
+    }),
+    makeFilter({
+      title: 'Subject',
+      disabled: true,
+      api: '/api/v1/types/list',
+      extraApiParams: { type: 'lesson' },
+      dependencies: [{ parent: index.level, targetKey: 'base_id', sourceKey: 'id' }],
+      queryKey: 'lesson',
+      children: subjectChildren,
+    }),
+    makeFilter({
+      title: 'Category',
+      hasSearch: false,
+      staticList: categoryOptions,
+      queryKey: 'type',
+      children: categoryChildren,
+      closable: false,
+      defaultValue: defaultCategory,
+      showItemIcon: true,
+      iconSrc: item => item.icon,
+      fallbackIcon: 'md:category',
+    }),
+  ]
+
+  const factories = {
+    topic: () => makeFilter({
+      title: 'Topic',
+      disabled: true,
+      api: '/api/v1/types/list',
+      extraApiParams: { type: 'topic' },
+      dependencies: [{ parent: index.subject, targetKey: 'lesson_id', sourceKey: 'id' }],
+      queryKey: 'topic',
+      selectedVariant: 'dependent-green',
+      controlIcon: 'md:sell_outlined',
+      unselectedIconColor: '#000000',
+      controlIconPadding: 4,
+    }),
+    year: () => makeFilter({
+      title: 'Year',
+      dependencies: [{ parent: index.category, targetKey: 'type', sourceKey: 'id' }],
+      staticList: Array.from({ length: 14 }, (_, i) => 2013 + i)
+        .reverse()
+        .map(year => ({ title: `${year}`, id: year })),
+      queryKey: 'edu_year',
+      selectedVariant: 'dependent-green',
+      controlIconSvg: {
+        viewBox: '0 0 28 28',
+        strokeWidth: 0.6,
+        paths: [
+          'M25.375 28H2.625C1.1725 28 0 26.8275 0 25.375V4.375C0 2.9225 1.1725 1.75 2.625 1.75H25.375C26.8275 1.75 28 2.9225 28 4.375V25.375C28 26.8275 26.8275 28 25.375 28ZM2.625 3.5C2.135 3.5 1.75 3.885 1.75 4.375V25.375C1.75 25.865 2.135 26.25 2.625 26.25H25.375C25.865 26.25 26.25 25.865 26.25 25.375V4.375C26.25 3.885 25.865 3.5 25.375 3.5H2.625Z',
+          'M7.875 7C7.385 7 7 6.615 7 6.125V0.875C7 0.385 7.385 0 7.875 0C8.365 0 8.75 0.385 8.75 0.875V6.125C8.75 6.615 8.365 7 7.875 7ZM20.125 7C19.635 7 19.25 6.615 19.25 6.125V0.875C19.25 0.385 19.635 0 20.125 0C20.615 0 21 0.385 21 0.875V6.125C21 6.615 20.615 7 20.125 7ZM27.125 10.5H0.875C0.385 10.5 0 10.115 0 9.625C0 9.135 0.385 8.75 0.875 8.75H27.125C27.615 8.75 28 9.135 28 9.625C28 10.115 27.615 10.5 27.125 10.5Z',
+        ],
+      },
+      unselectedIconColor: '#000000',
+      controlIconPadding: 4,
+    }),
+    session: () => makeFilter({
+      title: 'Session',
+      dependencies: [{ parent: index.category, targetKey: 'type', sourceKey: 'id' }],
+      staticList: [],
+      dependenciesForGetStaticData: [index.level],
+      getStaticList: (id = route.query.base) => {
+        const levelId = id === 'reset' ? route.query.base : (id || route.query.base)
+        return levelId && specialMonths[levelId] ? specialMonths[levelId] : allMonths
+      },
+      queryKey: 'edu_month',
+      selectedVariant: 'dependent-green',
+    }),
+    paper: () => makeFilter({
+      title: 'Paper',
+      disabled: true,
+      api: '/api/v1/types/list',
+      extraApiParams: { type: 'test_type' },
+      dependencies: [{ parent: index.board, targetKey: 'section_id', sourceKey: 'code' }],
+      itemFilter: item => item.is_paper === true,
+      queryKey: 'test_type',
+      inlineOptions: true,
+      inlineAllowClear: true,
+      itemTitle: (item) => {
+        const match = item.title?.match(/^\s*paper\s+(\d+)\s*$/i)
+        return match ? `P${match[1]}` : item.title
+      },
+    }),
+    variant: () => makeFilter({
+      title: 'Variants',
+      staticList: [
+        { id: '7814', title: '1' },
+        { id: '7815', title: '2' },
+        { id: '7816', title: '3' },
+      ],
+      queryKey: 'variant',
+      inlineOptions: true,
+      inlineAllowClear: true,
+    }),
+    material: () => makeFilter({
+      title: 'Material Type',
+      disabled: true,
+      api: '/api/v1/types/list',
+      extraApiParams: { type: 'test_type' },
+      dependencies: [{ parent: index.board, targetKey: 'section_id', sourceKey: 'code' }],
+      itemFilter: item => item.is_paper === false,
+      queryKey: 'test_type',
+      selectedVariant: 'dependent-green',
+    }),
+    'exam-type': () => makeFilter({
+      title: 'Exam Type',
+      api: '/api/v1/types/list',
+      extraApiParams: { type: 'exam_type' },
+      queryKey: 'exam_type',
+      selectedVariant: 'dependent-green',
+    }),
+  }
+
+  conditionalFilters.forEach(name => result.push(factories[name]()))
+  return result
+})
+
+const lastRequestedCategory = ref(activeCategory.value)
 
 const scrollToPageTop = async () => {
   if (!import.meta.client) return
@@ -626,6 +645,7 @@ const scrollToPageTop = async () => {
 }
 
 const changeFilter = async (query) => {
+  lastRequestedCategory.value = getEquivalentNewType(query.type)
   isAllDataLoaded.value = false
   isInitialDataLoading.value = true
   firstLoadedPageNumber.value = 1
@@ -635,6 +655,19 @@ const changeFilter = async (query) => {
   const responseList = await getDataList()
   data.value = responseList
 }
+
+watch(activeCategory, async (category) => {
+  if (category === lastRequestedCategory.value) return
+
+  lastRequestedCategory.value = category
+  isAllDataLoaded.value = false
+  isInitialDataLoading.value = true
+  firstLoadedPageNumber.value = 1
+  latestLoadedPageNumber.value = 1
+  querySearch.value = { ...route.query, type: category, page: 1 }
+  await scrollToPageTop()
+  data.value = await getDataList()
+})
 
 // Computed metadata that updates when data changes
 const metadata = computed(() => {
@@ -845,30 +878,24 @@ const createLinkAddConent = () => {
 
 onMounted(() => {
   const oldType = ['test', 'learnfiles', 'azmoon', 'question', 'dars']
-  if (oldType.includes(route.query.type)) {
-    const newType = getEquivalentNewType(route.query.type)
-    const staticListFilterType = filters[FILTER_INDEX.Services].staticList
-    const selectedType = staticListFilterType.filter(item => item.id == newType)[0]
-    filters[FILTER_INDEX.Services].selectedItem = selectedType
-    const newQuery = {
-      ...route.query,
-      type: newType,
-    }
-    router.replace({ query: newQuery })
+  const normalizedType = getEquivalentNewType(route.query.type)
+  if (!route.query.type || oldType.includes(route.query.type)) {
+    router.replace({
+      query: {
+        ...route.query,
+        type: normalizedType,
+      },
+    })
   }
 })
 </script>
 
 <style scoped>
 .top-info-div {
-  position: sticky;
-  top: 64px;
-  background-color: white;
-  z-index: 2;
+  display: contents !important;
 }
 .margin-top-handle {
-  margin-top: 64px;
-  min-height: calc(100vh - 64px);
+  min-height: 100vh;
 }
 
 :deep(.custom-search-text-field .v-field__outline__start) {
@@ -886,10 +913,4 @@ onMounted(() => {
   max-width: 1200px;
 }
 
-@media (min-width: 960px) {
-  .margin-top-handle {
-    margin-top: 6.4rem;
-    min-height: calc(100vh - 6.4rem);
-  }
-}
 </style>

@@ -19,7 +19,7 @@
           {{ progress }}%
         </v-progress-circular>
       </div>
-      <common-header />
+      <common-header :fixed="route.path !== '/search'" />
       <main>
         <div>
           <slot />

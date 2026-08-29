@@ -1,5 +1,8 @@
 <template>
-  <div class="w-100 d-flex justify-center flex-wrap">
+  <div
+    class="w-100 d-flex justify-center flex-wrap"
+    :class="{ 'filter-list-sticky-host': stickyContent }"
+  >
     <v-col
       :cols="hasKeywordSearch ? `4` : `12`"
       md="12"
@@ -60,31 +63,56 @@
     </v-col>
 
     <div
-      class="w-100 d-none d-md-flex justify-center align-center flex-wrap ga-4 mt-2"
+      class="w-100 d-flex justify-center flex-wrap"
+      :class="{ 'filter-list-sticky-content': stickyContent }"
     >
-      <div class="d-flex flex-wrap w-100 justify-start justify-md-center ga-2">
+      <div
+        class="w-100 d-none d-md-flex justify-center align-center flex-wrap ga-4 mt-2"
+      >
+        <div class="d-flex flex-wrap w-100 max-width-container justify-start ga-2">
         <template
           v-for="(filter, index) in filters"
           :key="filter.title || index"
         >
           <CommonChipSelectFilter
+            v-if="!filter.inlineOptions"
             :ref="(el) => (filters[index].refElement = el)"
             :title="filter.title"
             :api="filter.api"
             :selected-item="filter.selectedItem"
             :extra-api-params="filter.extraApiParams"
             :static-list="filter.staticList"
+            :item-filter="filter.itemFilter"
+            :item-transform="filter.itemTransform"
+            :item-sort="filter.itemSort"
+            :list-transform="filter.listTransform"
+            :show-item-icon="filter.showItemIcon"
+            :icon-src="filter.iconSrc"
+            :fallback-icon="filter.fallbackIcon"
+            :fallback-icon-src="filter.fallbackIconSrc"
+            :empty-fallback-icon-src="filter.emptyFallbackIconSrc"
+            :fallback-icon-padding="filter.fallbackIconPadding"
+            :boxed="filter.boxed"
+            :selected-variant="filter.selectedVariant"
+            :control-icon="filter.controlIcon"
+            :control-icon-src="filter.controlIconSrc"
+            :control-icon-svg="filter.controlIconSvg"
+            :unselected-icon-color="filter.unselectedIconColor"
+            :control-icon-padding="filter.controlIconPadding"
+            :inline-options="filter.inlineOptions"
+            :inline-allow-clear="filter.inlineAllowClear"
+            :item-title="filter.itemTitle"
             :disabled="filter.disabled"
             :has-search="filter.hasSearch"
             @update-selected-item="updateSelectedItem($event, index)"
           />
         </template>
-      </div>
-      <div class="justify-start d-flex w-100 max-width-container">
-        <div class="d-flex flex-wrap ga-2 px-2">
+        </div>
+        <div class="justify-start d-flex w-100 max-width-container">
+          <div class="d-flex flex-wrap ga-2 px-2">
           <template v-for="(filter, index) in filters">
             <v-chip
-              v-if="filter.selectedItem && !filter.defaultValue"
+              v-if="filter.selectedItem && !filter.defaultValue && !filter.inlineOptions"
               :key="filter.title"
               variant="flat"
               class="text-h5 pl-5 pr-5"
@@ -102,11 +130,40 @@
               </template>
             </v-chip>
           </template>
+          </div>
         </div>
       </div>
-    </div>
 
-    <v-dialog
+      <div
+        v-if="hasInlineFilters"
+        class="inline-filter-group-wrapper"
+      >
+        <div class="inline-filter-group">
+          <CommonChipSelectFilter
+            v-for="(entry, inlineIndex) in inlineFilterEntries"
+            :key="`inline-${entry.filter.title || entry.index}`"
+            :ref="(el) => (filters[entry.index].refElement = el)"
+            :title="entry.filter.title"
+            :api="entry.filter.api"
+            :selected-item="entry.filter.selectedItem"
+            :extra-api-params="entry.filter.extraApiParams"
+            :static-list="entry.filter.staticList"
+            :item-filter="entry.filter.itemFilter"
+            :inline-options="true"
+            :inline-allow-clear="entry.filter.inlineAllowClear"
+            :inline-grouped="true"
+            :inline-divider-after="inlineIndex === 0 && inlineFilterEntries.length > 1"
+            :inline-leading-option-slots="entry.filter.inlineLeadingOptionSlots"
+            :item-title="entry.filter.itemTitle"
+            :disabled="entry.filter.disabled"
+            @update-selected-item="updateSelectedItem($event, entry.index)"
+          />
+        </div>
+      </div>
+
+      <slot name="after-inline-filters" />
+
+      <v-dialog
       v-model="dialogFilterMobileModel"
       transition="dialog-bottom-transition"
       fullscreen
@@ -136,7 +193,7 @@
           >
             <template v-for="(filter, index) in filters">
               <v-chip
-                v-if="filter.selectedItem && !filter.defaultValue"
+                v-if="filter.selectedItem && !filter.defaultValue && !filter.inlineOptions"
                 :key="filter.title"
                 variant="flat"
                 class="text-h5 pl-5 pr-5"
@@ -159,14 +216,17 @@
             cols="12"
             class="d-flex flex-column justify-start align-center mt-4"
           >
-            <div
+            <template
               v-for="(filter, index) in filters"
-              :key="index"
-              :class="`w-100 d-flex justify-space-between align-center flex-wrap pt-2 pb-2 ${
-                filter.disabled ? `opacity-20 cursor-not-allowed` : ``
-              }`"
-              @click="openFilterSelectModal(filter)"
+              :key="filter.title || index"
             >
+              <div
+                v-if="!filter.inlineOptions"
+                :class="`w-100 d-flex justify-space-between align-center flex-wrap pt-2 pb-2 ${
+                  filter.disabled ? `opacity-20 cursor-not-allowed` : ``
+                }`"
+                @click="openFilterSelectModal(filter)"
+              >
               <v-badge
                 :color="filter.selectedItem ? `lightError` : `#ffffff`"
                 dot
@@ -192,12 +252,13 @@
                 </v-icon>
               </div>
 
-              <v-divider
-                :thickness="2"
-                class="border-opacity-100 mt-4 mb-4"
-                color="grey100"
-              />
-            </div>
+                <v-divider
+                  :thickness="2"
+                  class="border-opacity-100 mt-4 mb-4"
+                  color="grey100"
+                />
+              </div>
+            </template>
           </v-col>
         </v-container>
         <div
@@ -223,8 +284,8 @@
           </v-btn>
         </div>
       </div>
-    </v-dialog>
-    <v-col
+      </v-dialog>
+      <v-col
       cols="12"
       class="d-flex align-end justify-end ga-2 mt-1 py-0 px-2 max-width-container"
     >
@@ -241,9 +302,10 @@
       >{{
         $numberFormat(countDataFound)
       }}</span>
-    </v-col>
+      </v-col>
 
-    <slot />
+      <slot />
+    </div>
   </div>
 </template>
 
@@ -268,6 +330,10 @@ const props = defineProps({
     type: Boolean,
     default: false,
   },
+  stickyContent: {
+    type: Boolean,
+    default: false,
+  },
 })
 
 const emits = defineEmits(['changeFilter'])
@@ -289,7 +355,7 @@ onMounted(async () => {
   await fetchFilterAvailableInQuery()
 })
 
-const updateSelectedItem = (itemSelected, index) => {
+const updateSelectedItem = async (itemSelected, index) => {
   filters.value[index].selectedItem = itemSelected
 
   const isExclusiveSelected = isExclusiveFilterSelected(index)
@@ -305,7 +371,7 @@ const updateSelectedItem = (itemSelected, index) => {
     updateQueryFromFilters()
   }
   else {
-    enableReadyChildren(index)
+    await enableReadyChildren(index)
 
     updateQueryFromFilters()
   }
@@ -542,6 +608,33 @@ const openFilterSelectModal = (filter) => {
   filter.refElement.openSelectModal()
 }
 
+watch(
+  () => route.query,
+  async (query) => {
+    for (const filter of filters.value) {
+      if (!filter.inlineOptions || !filter.queryKey) continue
+
+      const queryValue = query[filter.queryKey]
+      if (!queryValue) {
+        filter.selectedItem = null
+        continue
+      }
+
+      if (String(filter.selectedItem?.id) === String(queryValue)) continue
+
+      const selected = await filter.refElement?.getItemById(queryValue, 'id')
+      if (selected) filter.selectedItem = selected
+    }
+  },
+  { deep: true },
+)
+const inlineFilterEntries = computed(() =>
+  filters.value
+    .map((filter, index) => ({ filter, index }))
+    .filter(entry => entry.filter.inlineOptions),
+)
+const hasInlineFilters = computed(() => inlineFilterEntries.value.length > 0)
+
 const changeTextSearch = () => {
   if (props.hasKeywordSearch) {
     const query = { ...route.query }
@@ -596,5 +689,33 @@ const clearAllFilter = async () => {
 }
 .max-width-container {
   max-width: 1200px;
+}
+.filter-list-sticky-content {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  background: rgb(var(--v-theme-surface));
+}
+.filter-list-sticky-host {
+  display: contents !important;
+}
+.inline-filter-group-wrapper {
+  display: flex;
+  width: 100%;
+  max-width: 1200px;
+  justify-content: flex-start;
+}
+.inline-filter-group {
+  display: flex;
+  width: fit-content;
+  max-width: 1200px;
+  flex-direction: column;
+  align-items: flex-start;
+  padding: 16px 24px;
+  margin-right: auto;
+  margin-top: 16px;
+  background: rgb(var(--v-theme-surface));
+  border: 1px solid rgb(var(--v-theme-grey300));
+  border-radius: 16px;
 }
 </style>

@@ -1,6 +1,7 @@
 <template>
   <header
-    class="w-100 position-fixed top-0 main-header d-flex align-center justify-center"
+    class="w-100 main-header d-flex align-center justify-center"
+    :class="{ 'position-fixed top-0': fixed }"
     :style="{ backgroundColor: menuSetting.bgColor, boxShadow: menuSetting.boxShadow }"
   >
     <v-container class="d-flex align-center justify-space-between">
@@ -150,6 +151,7 @@ import { useTheme, useDisplay } from 'vuetify'
 
 interface IHeader {
   isUserDashboard?: boolean
+  fixed?: boolean
 }
 interface MenuSetting {
   logo: string
@@ -166,6 +168,7 @@ const { mdAndDown } = useDisplay()
 
 const props = withDefaults(defineProps<IHeader>(), {
   isUserDashboard: false,
+  fixed: true,
 })
 
 const menuLink = [

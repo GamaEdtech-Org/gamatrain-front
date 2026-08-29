@@ -78,8 +78,37 @@
           @click="changeSelectedItem(item)"
         >
           <template #prepend>
+            <span
+              v-if="showItemIcon"
+              class="select-item-icon mr-2"
+              :style="item.iconPadding ? { padding: `${item.iconPadding}px` } : undefined"
+            >
+              <v-img
+                v-if="item.icon && !failedIconIds.has(String(item.id))"
+                :src="getIconSrc(item)"
+                :alt="item.title"
+                contain
+                @error="markIconFailed(item)"
+              />
+              <span
+                v-else-if="item.contentIcon"
+                :class="`${item.contentIcon} select-item-content-icon`"
+                :style="{ color: item.color }"
+              />
+              <v-img
+                v-else-if="fallbackIconSrc"
+                :src="fallbackIconSrc"
+                alt=""
+                contain
+              />
+              <v-icon
+                v-else
+                size="34"
+                color="grey500"
+              >{{ fallbackIcon }}</v-icon>
+            </span>
             <v-avatar
-              v-if="item.icon"
+              v-else-if="item.icon"
               size="34"
             >
               <v-img :src="`/images/boards/${item.icon}.svg`" />
@@ -210,12 +239,36 @@ const props = defineProps({
     type: Boolean,
     default: true,
   },
+  showItemIcon: {
+    type: Boolean,
+    default: false,
+  },
+  iconSrc: {
+    type: Function,
+    default: null,
+  },
+  fallbackIcon: {
+    type: String,
+    default: 'md:school',
+  },
+  fallbackIconSrc: {
+    type: String,
+    default: '',
+  },
 })
 
 const emit = defineEmits(['update:showDialog', 'changeSelectedItem'])
 
 // Start Section Search Item In List
 const searchText = ref('')
+const failedIconIds = ref(new Set())
+const getIconSrc = item => props.iconSrc?.(item) || item.icon
+const markIconFailed = (item) => {
+  failedIconIds.value = new Set([
+    ...failedIconIds.value,
+    String(item.id),
+  ])
+}
 const filteredItems = computed(() => {
   if (!searchText.value) return props.items
   return props.items.filter(item =>
@@ -259,6 +312,28 @@ const clickOnModal = (event) => {
 .size-icon {
   font-size: 24px;
   margin-right: 12px;
+}
+.select-item-content-icon {
+  display: inline-flex;
+  width: 34px;
+  height: 34px;
+  align-items: center;
+  justify-content: center;
+  font-size: 34px;
+  line-height: 1;
+}
+.select-item-icon {
+  box-sizing: border-box;
+  display: inline-flex;
+  width: 34px;
+  height: 34px;
+  flex: 0 0 34px;
+  align-items: center;
+  justify-content: center;
+}
+.select-item-icon .v-img {
+  width: 100%;
+  height: 100%;
 }
 @media only screen and (max-width: 960px) {
   .mobile-style {
