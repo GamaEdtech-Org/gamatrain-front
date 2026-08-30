@@ -8,7 +8,7 @@
           :count-data-found="totalDataFind"
           :loading="isInitialDataLoading"
           has-keyword-search
-          sticky-content
+          desktop-sticky-filters
           @change-filter="changeFilter"
         >
           <template #after-inline-filters>

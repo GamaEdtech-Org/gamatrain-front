@@ -8,23 +8,10 @@
       md="12"
       class="d-flex d-md-none justify-start"
     >
-      <v-badge
-        class="height-badge d-inline-flex align-center justify-center"
-        offset-x="5"
-        offset-y="-5"
-        :color="countFilterSelect == 0 ? `transparent` : `lightError`"
-        :content="countFilterSelect == 0 ? `` : countFilterSelect"
-      >
-        <v-btn
-          rounded="xl"
-          variant="outlined"
-          color="grey300"
-          density="comfortable"
-          @click="dialogFilterMobileModel = !dialogFilterMobileModel"
-        >
-          <span class="text-grey700 d-flex align-center ga-2 text-h6 font-weight-bold"><v-icon>md:tune</v-icon> Filter</span>
-        </v-btn>
-      </v-badge>
+      <CommonFilterTrigger
+        :count="countFilterSelect"
+        @click="dialogFilterMobileModel = !dialogFilterMobileModel"
+      />
     </v-col>
     <v-col
       v-if="hasKeywordSearch"
@@ -67,101 +54,177 @@
       :class="{ 'filter-list-sticky-content': stickyContent }"
     >
       <div
-        class="w-100 d-none d-md-flex justify-center align-center flex-wrap ga-4 mt-2"
+        ref="filterControlsShell"
+        class="desktop-filter-controls-shell w-100 d-flex justify-center"
+        :style="stickyMode
+          ? { height: `${filterControlsHeight}px` }
+          : undefined"
       >
-        <div class="d-flex flex-wrap w-100 max-width-container justify-start ga-2">
-        <template
-          v-for="(filter, index) in filters"
-          :key="filter.title || index"
+        <div
+          ref="filterControls"
+          class="desktop-filter-controls w-100"
+          :class="{
+            'desktop-filter-controls-fixed': stickyMode,
+            'desktop-filter-controls-collapsed': stickyMode && !stickyFiltersExpanded,
+          }"
+          :style="stickyMode
+            ? { height: stickyFiltersExpanded ? `${filterControlsHeight}px` : '0px' }
+            : undefined"
         >
-          <CommonChipSelectFilter
-            v-if="!filter.inlineOptions"
-            :ref="(el) => (filters[index].refElement = el)"
-            :title="filter.title"
-            :api="filter.api"
-            :selected-item="filter.selectedItem"
-            :extra-api-params="filter.extraApiParams"
-            :static-list="filter.staticList"
-            :item-filter="filter.itemFilter"
-            :item-transform="filter.itemTransform"
-            :item-sort="filter.itemSort"
-            :list-transform="filter.listTransform"
-            :show-item-icon="filter.showItemIcon"
-            :icon-src="filter.iconSrc"
-            :fallback-icon="filter.fallbackIcon"
-            :fallback-icon-src="filter.fallbackIconSrc"
-            :empty-fallback-icon-src="filter.emptyFallbackIconSrc"
-            :fallback-icon-padding="filter.fallbackIconPadding"
-            :boxed="filter.boxed"
-            :selected-variant="filter.selectedVariant"
-            :control-icon="filter.controlIcon"
-            :control-icon-src="filter.controlIconSrc"
-            :control-icon-svg="filter.controlIconSvg"
-            :unselected-icon-color="filter.unselectedIconColor"
-            :control-icon-padding="filter.controlIconPadding"
-            :inline-options="filter.inlineOptions"
-            :inline-allow-clear="filter.inlineAllowClear"
-            :item-title="filter.itemTitle"
-            :disabled="filter.disabled"
-            :has-search="filter.hasSearch"
-            @update-selected-item="updateSelectedItem($event, index)"
-          />
-        </template>
-        </div>
-        <div class="justify-start d-flex w-100 max-width-container">
-          <div class="d-flex flex-wrap ga-2 px-2">
-          <template v-for="(filter, index) in filters">
-            <v-chip
-              v-if="filter.selectedItem && !filter.defaultValue && !filter.inlineOptions"
-              :key="filter.title"
-              variant="flat"
-              class="text-h5 pl-5 pr-5"
-              color="grey100"
+          <div
+            ref="filterControlsContent"
+            class="desktop-filter-controls-content w-100 d-flex justify-center flex-wrap"
+          >
+            <div
+              class="w-100 d-none d-md-flex justify-center align-center flex-wrap ga-4 mt-2"
             >
-              <span class="text-grey500">{{ filter.selectedItem?.title }}</span>
-              <template #close>
-                <v-icon
-                  v-if="filter.closable"
-                  color="grey500"
-                  @click="clearFilter(index)"
+              <div class="d-flex flex-wrap w-100 max-width-container justify-start ga-2">
+                <template
+                  v-for="(filter, index) in filters"
+                  :key="filter.title || index"
                 >
-                  md:cancel
-                </v-icon>
-              </template>
-            </v-chip>
-          </template>
+                  <CommonChipSelectFilter
+                    v-if="!filter.inlineOptions"
+                    :ref="(el) => (filters[index].refElement = el)"
+                    :title="filter.title"
+                    :api="filter.api"
+                    :selected-item="filter.selectedItem"
+                    :extra-api-params="filter.extraApiParams"
+                    :static-list="filter.staticList"
+                    :item-filter="filter.itemFilter"
+                    :item-transform="filter.itemTransform"
+                    :item-sort="filter.itemSort"
+                    :list-transform="filter.listTransform"
+                    :show-item-icon="filter.showItemIcon"
+                    :icon-src="filter.iconSrc"
+                    :fallback-icon="filter.fallbackIcon"
+                    :fallback-icon-src="filter.fallbackIconSrc"
+                    :empty-fallback-icon-src="filter.emptyFallbackIconSrc"
+                    :fallback-icon-padding="filter.fallbackIconPadding"
+                    :boxed="filter.boxed"
+                    :selected-variant="filter.selectedVariant"
+                    :control-icon="filter.controlIcon"
+                    :control-icon-src="filter.controlIconSrc"
+                    :control-icon-svg="filter.controlIconSvg"
+                    :unselected-icon-color="filter.unselectedIconColor"
+                    :control-icon-padding="filter.controlIconPadding"
+                    :inline-options="filter.inlineOptions"
+                    :inline-allow-clear="filter.inlineAllowClear"
+                    :item-title="filter.itemTitle"
+                    :disabled="filter.disabled"
+                    :has-search="filter.hasSearch"
+                    @update-selected-item="updateSelectedItem($event, index)"
+                  />
+                </template>
+              </div>
+              <div class="justify-start d-flex w-100 max-width-container">
+                <div class="d-flex flex-wrap ga-2 px-2">
+                  <template v-for="(filter, index) in filters">
+                    <v-chip
+                      v-if="filter.selectedItem && !filter.defaultValue && !filter.inlineOptions"
+                      :key="filter.title"
+                      variant="flat"
+                      class="text-h5 pl-5 pr-5"
+                      color="grey100"
+                    >
+                      <span class="text-grey500">{{ filter.selectedItem?.title }}</span>
+                      <template #close>
+                        <v-icon
+                          v-if="filter.closable"
+                          color="grey500"
+                          @click="clearFilter(index)"
+                        >
+                          md:cancel
+                        </v-icon>
+                      </template>
+                    </v-chip>
+                  </template>
+                </div>
+              </div>
+            </div>
+
+            <div
+              v-if="hasInlineFilters"
+              class="inline-filter-group-wrapper"
+            >
+              <div class="inline-filter-group">
+                <CommonChipSelectFilter
+                  v-for="(entry, inlineIndex) in inlineFilterEntries"
+                  :key="`inline-${entry.filter.title || entry.index}`"
+                  :ref="(el) => (filters[entry.index].refElement = el)"
+                  :title="entry.filter.title"
+                  :api="entry.filter.api"
+                  :selected-item="entry.filter.selectedItem"
+                  :extra-api-params="entry.filter.extraApiParams"
+                  :static-list="entry.filter.staticList"
+                  :item-filter="entry.filter.itemFilter"
+                  :inline-options="true"
+                  :inline-allow-clear="entry.filter.inlineAllowClear"
+                  :inline-grouped="true"
+                  :inline-divider-after="inlineIndex === 0 && inlineFilterEntries.length > 1"
+                  :inline-leading-option-slots="entry.filter.inlineLeadingOptionSlots"
+                  :item-title="entry.filter.itemTitle"
+                  :disabled="entry.filter.disabled"
+                  @update-selected-item="updateSelectedItem($event, entry.index)"
+                />
+              </div>
+            </div>
           </div>
         </div>
       </div>
 
       <div
-        v-if="hasInlineFilters"
-        class="inline-filter-group-wrapper"
+        ref="persistentContentShell"
+        class="persistent-search-content-shell w-100 d-flex justify-center"
+        :style="stickyMode ? { height: `${persistentContentHeight}px` } : undefined"
       >
-        <div class="inline-filter-group">
-          <CommonChipSelectFilter
-            v-for="(entry, inlineIndex) in inlineFilterEntries"
-            :key="`inline-${entry.filter.title || entry.index}`"
-            :ref="(el) => (filters[entry.index].refElement = el)"
-            :title="entry.filter.title"
-            :api="entry.filter.api"
-            :selected-item="entry.filter.selectedItem"
-            :extra-api-params="entry.filter.extraApiParams"
-            :static-list="entry.filter.staticList"
-            :item-filter="entry.filter.itemFilter"
-            :inline-options="true"
-            :inline-allow-clear="entry.filter.inlineAllowClear"
-            :inline-grouped="true"
-            :inline-divider-after="inlineIndex === 0 && inlineFilterEntries.length > 1"
-            :inline-leading-option-slots="entry.filter.inlineLeadingOptionSlots"
-            :item-title="entry.filter.itemTitle"
-            :disabled="entry.filter.disabled"
-            @update-selected-item="updateSelectedItem($event, entry.index)"
-          />
+        <div
+          ref="persistentContent"
+          class="persistent-search-content w-100 d-flex justify-center flex-wrap"
+          :class="{ 'persistent-search-content-fixed': stickyMode }"
+          :style="stickyMode
+            ? { top: stickyFiltersExpanded ? `${filterControlsHeight}px` : '0px' }
+            : undefined"
+        >
+          <div
+            v-if="stickyMode"
+            class="sticky-filter-trigger-row d-none d-md-flex w-100 max-width-container"
+            :class="{ 'sticky-filter-trigger-row-visible': !stickyFiltersExpanded }"
+          >
+            <CommonFilterTrigger
+              :count="countFilterSelect"
+              @click="expandStickyFilters"
+            />
+          </div>
+
+          <slot name="after-inline-filters" />
+
+          <v-col
+            cols="12"
+            class="d-flex align-end justify-end ga-2 mt-1 py-0 px-2 max-width-container"
+          >
+            <slot
+              name="results-heading"
+              :count="countDataFound"
+              :loading="loading"
+            >
+              <span class="text-h5 text-grey400">Result</span>
+              <v-skeleton-loader
+                v-if="loading"
+                width="100"
+                height="20"
+                class="rounded-lg"
+              />
+              <span
+                v-else
+                class="text-h4 text-grey700 font-weight-bold"
+              >{{
+                $numberFormat(countDataFound)
+              }}</span>
+            </slot>
+          </v-col>
         </div>
       </div>
-
-      <slot name="after-inline-filters" />
 
       <v-dialog
       v-model="dialogFilterMobileModel"
@@ -285,31 +348,6 @@
         </div>
       </div>
       </v-dialog>
-      <v-col
-      cols="12"
-      class="d-flex align-end justify-end ga-2 mt-1 py-0 px-2 max-width-container"
-    >
-      <slot
-        name="results-heading"
-        :count="countDataFound"
-        :loading="loading"
-      >
-        <span class="text-h5 text-grey400">Result</span>
-        <v-skeleton-loader
-          v-if="loading"
-          width="100"
-          height="20"
-          class="rounded-lg"
-        />
-        <span
-          v-else
-          class="text-h4 text-grey700 font-weight-bold"
-        >{{
-          $numberFormat(countDataFound)
-        }}</span>
-      </slot>
-      </v-col>
-
       <slot />
     </div>
   </div>
@@ -340,6 +378,10 @@ const props = defineProps({
     type: Boolean,
     default: false,
   },
+  desktopStickyFilters: {
+    type: Boolean,
+    default: false,
+  },
 })
 
 const emits = defineEmits(['changeFilter'])
@@ -355,10 +397,36 @@ const countFilterSelect = ref(Object.keys(route.query).length)
 const textSearch = ref(route.query.title ? route.query.title : '')
 const timer = ref(null)
 const hasExclusiveDisabledState = ref(false)
+const filterControlsShell = ref(null)
+const filterControls = ref(null)
+const filterControlsContent = ref(null)
+const persistentContentShell = ref(null)
+const persistentContent = ref(null)
+const stickyMode = ref(false)
+const stickyFiltersExpanded = ref(false)
+const filterControlsHeight = ref(0)
+const persistentContentHeight = ref(0)
+let filterBoundaryObserver = null
+let filterControlsResizeObserver = null
+let persistentContentResizeObserver = null
+let desktopMediaQuery = null
+let scrollDirectionAnchor = 0
+
+const SCROLL_DIRECTION_THRESHOLD = 12
 
 onMounted(async () => {
   await fetchDataRequireFilter()
   await fetchFilterAvailableInQuery()
+  await nextTick()
+  setupDesktopStickyBehavior()
+})
+
+onBeforeUnmount(() => {
+  filterBoundaryObserver?.disconnect()
+  filterControlsResizeObserver?.disconnect()
+  persistentContentResizeObserver?.disconnect()
+  desktopMediaQuery?.removeEventListener('change', handleDesktopBreakpointChange)
+  window.removeEventListener('scroll', handleStickyScroll)
 })
 
 const updateSelectedItem = async (itemSelected, index) => {
@@ -614,6 +682,113 @@ const openFilterSelectModal = (filter) => {
   filter.refElement.openSelectModal()
 }
 
+const measureStickyContent = () => {
+  if (filterControlsContent.value) {
+    filterControlsHeight.value = filterControlsContent.value.offsetHeight
+  }
+  if (persistentContent.value && !stickyMode.value) {
+    persistentContentHeight.value = persistentContent.value.getBoundingClientRect().height
+  }
+}
+
+const resetStickyMode = () => {
+  stickyMode.value = false
+  stickyFiltersExpanded.value = false
+  scrollDirectionAnchor = window.scrollY
+}
+
+const handleDesktopBreakpointChange = (event) => {
+  filterBoundaryObserver?.disconnect()
+  filterBoundaryObserver = null
+
+  if (!event.matches) {
+    resetStickyMode()
+    return
+  }
+
+  nextTick(() => {
+    measureStickyContent()
+    observeFilterBoundary()
+  })
+}
+
+const setupDesktopStickyBehavior = () => {
+  if (!props.desktopStickyFilters || !import.meta.client) return
+
+  desktopMediaQuery = window.matchMedia('(min-width: 960px)')
+  desktopMediaQuery.addEventListener('change', handleDesktopBreakpointChange)
+  window.addEventListener('scroll', handleStickyScroll, { passive: true })
+
+  filterControlsResizeObserver = new ResizeObserver(() => {
+    if (filterControlsContent.value) {
+      filterControlsHeight.value = filterControlsContent.value.offsetHeight
+    }
+  })
+  persistentContentResizeObserver = new ResizeObserver(() => {
+    if (persistentContent.value && !stickyMode.value) {
+      persistentContentHeight.value = persistentContent.value.getBoundingClientRect().height
+    }
+  })
+
+  if (filterControlsContent.value) filterControlsResizeObserver.observe(filterControlsContent.value)
+  if (persistentContent.value) persistentContentResizeObserver.observe(persistentContent.value)
+
+  measureStickyContent()
+  scrollDirectionAnchor = window.scrollY
+  if (desktopMediaQuery.matches) observeFilterBoundary()
+}
+
+const observeFilterBoundary = () => {
+  const target = filterControlsShell.value
+  if (!target) return
+
+  filterBoundaryObserver = new IntersectionObserver(([entry]) => {
+    const hasPassedAboveViewport
+      = !entry.isIntersecting && entry.boundingClientRect.bottom <= 0
+
+    if (hasPassedAboveViewport && !stickyMode.value) {
+      stickyFiltersExpanded.value = true
+      stickyMode.value = true
+      scrollDirectionAnchor = window.scrollY
+
+      requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+          if (stickyMode.value) stickyFiltersExpanded.value = false
+        })
+      })
+    }
+    else if (!hasPassedAboveViewport) {
+      resetStickyMode()
+    }
+  }, { threshold: 0 })
+
+  filterBoundaryObserver.observe(target)
+}
+
+const expandStickyFilters = async () => {
+  measureStickyContent()
+  stickyFiltersExpanded.value = true
+  scrollDirectionAnchor = window.scrollY
+  await nextTick()
+  measureStickyContent()
+}
+
+const handleStickyScroll = () => {
+  if (!stickyMode.value || !stickyFiltersExpanded.value) {
+    scrollDirectionAnchor = window.scrollY
+    return
+  }
+
+  const scrollDelta = window.scrollY - scrollDirectionAnchor
+  if (scrollDelta >= SCROLL_DIRECTION_THRESHOLD) {
+    stickyFiltersExpanded.value = false
+    scrollDirectionAnchor = window.scrollY
+  }
+  else if (scrollDelta <= -SCROLL_DIRECTION_THRESHOLD) {
+    scrollDirectionAnchor = window.scrollY
+  }
+}
+
 watch(
   () => route.query,
   async (query) => {
@@ -705,6 +880,22 @@ const clearAllFilter = async () => {
 .filter-list-sticky-host {
   display: contents !important;
 }
+.desktop-filter-controls,
+.persistent-search-content {
+  background: rgb(var(--v-theme-surface));
+}
+.desktop-filter-controls-content {
+  transform-origin: top center;
+}
+.sticky-filter-trigger-row {
+  box-sizing: border-box;
+  height: 0;
+  overflow: hidden;
+  padding: 0;
+  opacity: 0;
+  transform: scale(0.96);
+  transform-origin: top left;
+}
 .inline-filter-group-wrapper {
   display: flex;
   width: 100%;
@@ -723,5 +914,52 @@ const clearAllFilter = async () => {
   background: rgb(var(--v-theme-surface));
   border: 1px solid rgb(var(--v-theme-grey300));
   border-radius: 16px;
+}
+
+@media (min-width: 960px) {
+  .desktop-filter-controls-fixed,
+  .persistent-search-content-fixed {
+    position: fixed;
+    z-index: 11;
+    top: 0;
+    left: 0;
+  }
+
+  .desktop-filter-controls-fixed {
+    z-index: 12;
+    overflow: hidden;
+    transition: height 250ms cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  .desktop-filter-controls-fixed .desktop-filter-controls-content {
+    transition:
+      opacity 250ms cubic-bezier(0.16, 1, 0.3, 1),
+      transform 250ms cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  .desktop-filter-controls-collapsed .desktop-filter-controls-content {
+    pointer-events: none;
+    opacity: 0;
+    transform: translateY(-8px) scale(0.98);
+  }
+
+  .persistent-search-content-fixed {
+    transition: top 250ms cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  .sticky-filter-trigger-row {
+    transition:
+      height 250ms cubic-bezier(0.16, 1, 0.3, 1),
+      padding 250ms cubic-bezier(0.16, 1, 0.3, 1),
+      opacity 200ms ease-out,
+      transform 250ms cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  .sticky-filter-trigger-row-visible {
+    height: 56px;
+    padding: 8px 0;
+    opacity: 1;
+    transform: scale(1);
+  }
 }
 </style>
