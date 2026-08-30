@@ -16,13 +16,25 @@
               <CommonDetailSubjectDirectoryNav :content-data="data[0]" />
             </div>
           </template>
-          <div
-            class="w-100 d-flex flex-column align-start ga-2 px-2 max-width-container"
-          >
-            <h1 class="text-h6 text-md-h5 pt-2">
+          <template #results-heading="{ count, loading: headingLoading }">
+            <div class="search-results-heading w-100 d-flex flex-wrap align-center justify-space-between ga-4">
+              <h1 class="search-results-title">
               {{ metadata.title }}
-            </h1>
-          </div>
+              </h1>
+              <div class="search-results-count d-flex align-center ga-2 flex-shrink-0">
+                <v-skeleton-loader
+                  v-if="headingLoading"
+                  width="100"
+                  height="24"
+                  class="rounded-lg"
+                />
+                <template v-else>
+                  <span class="search-results-count-number">{{ $numberFormat(count) }}</span>
+                  <span class="search-results-count-label">Results</span>
+                </template>
+              </div>
+            </div>
+          </template>
         </CommonFilterList>
       </div>
 
@@ -593,7 +605,7 @@ const filters = computed(() => {
       inlineAllowClear: true,
       itemTitle: (item) => {
         const match = item.title?.match(/^\s*paper\s+(\d+)\s*$/i)
-        return match ? `P${match[1]}` : item.title
+        return match ? match[1] : item.title
       },
     }),
     variant: () => makeFilter({
@@ -711,7 +723,7 @@ const metadata = computed(() => {
       = firstElement?.test_type_title || firstElement?.azmoon_type_title
   }
 
-  const joinTextTitles = `${titles.monthTitle} ${titles.yearTitle} ${titles.classificationTitle} ${titles.subjectTitle} ${titles.gradeTitle} ${titles.boardTitle}`
+  const joinTextTitles = `${titles.boardTitle} ${titles.gradeTitle} ${titles.subjectTitle} ${titles.classificationTitle} ${titles.monthTitle} ${titles.yearTitle}`
 
   // Generate title
   let appendText = ''
@@ -911,6 +923,30 @@ onMounted(() => {
 }
 .max-width-container {
   max-width: 1200px;
+}
+.search-results-heading {
+  min-width: 0;
+  margin-bottom: 16px;
+}
+.search-results-title {
+  min-width: 0;
+  margin: 0;
+  font-size: 24px;
+  font-weight: 700;
+  line-height: 32px;
+  text-align: left;
+}
+.search-results-count-number {
+  color: #397f7b;
+  font-size: 24px;
+  font-weight: 700;
+  line-height: 32px;
+}
+.search-results-count-label {
+  color: rgb(var(--v-theme-grey700));
+  font-size: 16px;
+  font-weight: 500;
+  line-height: 24px;
 }
 
 </style>

@@ -608,6 +608,7 @@ defineExpose({
 
 .inline-filter-grouped-row .inline-filter-options {
   flex: none;
+  gap: 8px;
 }
 
 .inline-filter-divider {
@@ -617,13 +618,14 @@ defineExpose({
 }
 
 .inline-filter-option {
-  width: var(--inline-filter-option-width);
-  min-width: var(--inline-filter-option-width);
-  max-width: var(--inline-filter-option-width);
-  height: var(--inline-filter-option-height) !important;
-  padding-inline: 16px;
+  width: auto;
+  min-width: 0;
+  max-width: none;
+  height: auto !important;
+  padding: 8px 12px !important;
   border-radius: 12px !important;
-  font-size: 16px;
+  font-size: 14px;
+  line-height: 20px;
   color: rgb(var(--v-theme-grey800));
   background: rgb(var(--v-theme-surface));
   border-color: rgb(var(--v-theme-grey300)) !important;

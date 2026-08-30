@@ -289,19 +289,25 @@
       cols="12"
       class="d-flex align-end justify-end ga-2 mt-1 py-0 px-2 max-width-container"
     >
-      <span class="text-h5 text-grey400">Result</span>
-      <v-skeleton-loader
-        v-if="loading"
-        width="100"
-        height="20"
-        class="rounded-lg"
-      />
-      <span
-        v-else
-        class="text-h4 text-grey700 font-weight-bold"
-      >{{
-        $numberFormat(countDataFound)
-      }}</span>
+      <slot
+        name="results-heading"
+        :count="countDataFound"
+        :loading="loading"
+      >
+        <span class="text-h5 text-grey400">Result</span>
+        <v-skeleton-loader
+          v-if="loading"
+          width="100"
+          height="20"
+          class="rounded-lg"
+        />
+        <span
+          v-else
+          class="text-h4 text-grey700 font-weight-bold"
+        >{{
+          $numberFormat(countDataFound)
+        }}</span>
+      </slot>
       </v-col>
 
       <slot />
