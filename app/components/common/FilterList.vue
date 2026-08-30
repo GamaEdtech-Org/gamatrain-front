@@ -412,7 +412,8 @@ let persistentContentResizeObserver = null
 let desktopMediaQuery = null
 let scrollDirectionAnchor = 0
 
-const SCROLL_DIRECTION_THRESHOLD = 12
+const DOWNWARD_COLLAPSE_THRESHOLD = 80
+const UPWARD_BASELINE_RESET_THRESHOLD = 12
 
 onMounted(async () => {
   await fetchDataRequireFilter()
@@ -780,11 +781,11 @@ const handleStickyScroll = () => {
   }
 
   const scrollDelta = window.scrollY - scrollDirectionAnchor
-  if (scrollDelta >= SCROLL_DIRECTION_THRESHOLD) {
+  if (scrollDelta >= DOWNWARD_COLLAPSE_THRESHOLD) {
     stickyFiltersExpanded.value = false
     scrollDirectionAnchor = window.scrollY
   }
-  else if (scrollDelta <= -SCROLL_DIRECTION_THRESHOLD) {
+  else if (scrollDelta <= -UPWARD_BASELINE_RESET_THRESHOLD) {
     scrollDirectionAnchor = window.scrollY
   }
 }
