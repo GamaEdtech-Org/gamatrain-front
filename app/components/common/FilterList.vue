@@ -3,6 +3,10 @@
     class="w-100 d-flex justify-center flex-wrap"
     :class="{ 'filter-list-sticky-host': stickyContent }"
   >
+    <slot
+      name="category-navigation"
+      :select-category="selectCategory"
+    />
     <v-col
       :cols="hasKeywordSearch ? `4` : `12`"
       md="12"
@@ -82,13 +86,18 @@
             ref="filterControlsContent"
             class="desktop-filter-controls-content w-100 d-flex justify-center flex-wrap"
           >
+            <component
+              :is="filterContainer || 'div'"
+              :style="filterContainer ? undefined : { display: 'contents' }"
+            >
             <div
               class="w-100 d-none d-md-flex justify-center align-center flex-wrap ga-4 mt-2"
             >
               <div class="d-flex flex-wrap w-100 max-width-container justify-start ga-2">
-                <template
+                <div
                   v-for="(filter, index) in filters"
                   :key="filter.title || index"
+                  :style="{ display: $slots['category-navigation'] && filter.queryKey === 'type' ? 'none' : 'contents' }"
                 >
                   <CommonChipSelectFilter
                     v-if="!filter.inlineOptions"
@@ -109,6 +118,7 @@
                     :empty-fallback-icon-src="filter.emptyFallbackIconSrc"
                     :fallback-icon-padding="filter.fallbackIconPadding"
                     :boxed="filter.boxed"
+                    :show-clear="Boolean(filterContainer && filter.closable && !filter.defaultValue)"
                     :selected-variant="filter.selectedVariant"
                     :control-icon="filter.controlIcon"
                     :control-icon-src="filter.controlIconSrc"
@@ -121,10 +131,14 @@
                     :disabled="filter.disabled"
                     :has-search="filter.hasSearch"
                     @update-selected-item="updateSelectedItem($event, index)"
+                    @clear="clearDropdownFilter(index)"
                   />
-                </template>
+                </div>
               </div>
-              <div class="justify-start d-flex w-100 max-width-container">
+              <div
+                v-if="!filterContainer"
+                class="justify-start d-flex w-100 max-width-container"
+              >
                 <div class="d-flex flex-wrap ga-2 px-2">
                   <template v-for="(filter, index) in filters">
                     <v-chip
@@ -177,6 +191,7 @@
                 />
               </div>
             </div>
+            </component>
           </div>
         </div>
       </div>
@@ -375,6 +390,10 @@ const props = defineProps({
     type: Array,
     default: () => [],
   },
+  filterContainer: {
+    type: [Object, Function],
+    default: null,
+  },
   countDataFound: {
     type: [Number, String],
     default: () => 0,
@@ -469,6 +488,15 @@ const updateSelectedItem = async (itemSelected, index) => {
 
     updateQueryFromFilters()
   }
+}
+
+const selectCategory = (categoryId) => {
+  const index = filters.value.findIndex(filter => filter.queryKey === 'type')
+  const filter = filters.value[index]
+  const category = filter?.staticList?.find(item => item.id === categoryId)
+  if (!category || filter.selectedItem?.id === categoryId) return
+
+  return updateSelectedItem(category, index)
 }
 
 const isExclusiveFilterSelected = (index) => {
@@ -609,8 +637,18 @@ const clearFilter = (index) => {
   updateQueryFromFilters()
 }
 
-const updateQueryFromFilters = async () => {
-  const query = {}
+const clearDropdownFilter = (index) => {
+  const filter = filters.value[index]
+  if (!filter?.selectedItem || !filter.closable || filter.defaultValue) return
+
+  filter.selectedItem = null
+
+  const query = { ...route.query }
+  delete query[filter.queryKey]
+  updateQueryFromFilters(query)
+}
+
+const updateQueryFromFilters = async (query = {}) => {
   const titles = {}
 
   filters.value.forEach((f) => {

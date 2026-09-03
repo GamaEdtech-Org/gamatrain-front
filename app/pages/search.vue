@@ -5,6 +5,8 @@
         <CommonFilterList
           :key="activeCategory"
           :filter-list="filters"
+          :filter-container="CategoryFilterContainer"
+          :style="{ '--search-category-color': activeCategoryColor }"
           :count-data-found="totalDataFind"
           :loading="isInitialDataLoading"
           has-keyword-search
@@ -12,6 +14,12 @@
           desktop-sticky-filters
           @change-filter="changeFilter"
         >
+          <template #category-navigation="{ selectCategory }">
+            <SearchCategoryTabs
+              :active-category="activeCategory"
+              @change="selectCategory"
+            />
+          </template>
           <template #after-inline-filters>
             <div class="w-100 d-flex align-start justify-start max-width-container">
               <CommonDetailSubjectDirectoryNav :content-data="data[0]" />
@@ -77,6 +85,7 @@
 </template>
 
 <script setup>
+import CategoryFilterContainer from '~/components/search/CategoryFilterContainer.vue'
 import dayjs from 'dayjs'
 import { useRoute } from 'vue-router'
 
@@ -424,6 +433,9 @@ const categoryOptions = [
 ]
 
 const defaultCategory = categoryOptions[0]
+const activeCategoryColor = computed(() =>
+  (categoryOptions.find(category => category.id === activeCategory.value) || defaultCategory).color,
+)
 
 const makeFilter = overrides => ({
   selectedItem: null,
@@ -912,6 +924,7 @@ onMounted(() => {
 }
 
 :deep(.inline-filter-group) {
+  border: 0;
   max-width: 100%;
   flex-direction: row;
   align-items: stretch;

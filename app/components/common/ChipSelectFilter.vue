@@ -150,6 +150,20 @@
     >{{ selectedItem ? selectedItem.title : title }}</span>
     <template #append>
       <v-icon
+        v-if="showClear && selectedItem"
+        class="search-filter-clear-icon mr-1"
+        color="grey500"
+        size="18"
+        role="button"
+        tabindex="0"
+        :aria-label="`Clear ${title}`"
+        @click.stop="emit('clear')"
+        @keydown.enter.stop.prevent="emit('clear')"
+        @keydown.space.stop.prevent="emit('clear')"
+      >
+        md:cancel
+      </v-icon>
+      <v-icon
         class="mt-1"
         color="grey500"
       >
@@ -258,6 +272,10 @@ const props = defineProps({
     type: Boolean,
     default: false,
   },
+  showClear: {
+    type: Boolean,
+    default: false,
+  },
   selectedVariant: {
     type: String,
     default: '',
@@ -308,7 +326,7 @@ const props = defineProps({
   },
 })
 
-const emit = defineEmits(['UpdateSelectedItem'])
+const emit = defineEmits(['UpdateSelectedItem', 'clear'])
 
 const items = ref([...props.staticList])
 const isShowSelectModal = ref(false)
@@ -538,6 +556,18 @@ defineExpose({
 .dependent-selected-btn .search-filter-value,
 .dependent-selected-btn .v-icon {
   color: #397f7b !important;
+}
+
+.v-btn .search-filter-clear-icon {
+  color: rgb(var(--v-theme-grey500)) !important;
+}
+
+.v-btn .search-filter-clear-icon:hover {
+  color: rgb(var(--v-theme-error)) !important;
+}
+
+.v-btn:has(.search-filter-clear-icon:hover) {
+  --v-hover-opacity: 0;
 }
 
 .inline-filter-selector {
