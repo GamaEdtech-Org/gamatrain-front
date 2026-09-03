@@ -15,10 +15,15 @@
     </v-col>
     <v-col
       v-if="hasKeywordSearch"
+      v-show="!headerSearchActive"
       cols="8"
       md="12"
       class="d-flex justify-end justify-md-center"
     >
+      <Teleport
+        :to="headerSearchActive ? '#search-header-keyword' : null"
+        :disabled="!headerSearchActive"
+      >
       <v-text-field
         v-model="textSearch"
         label="Search anything...."
@@ -28,6 +33,7 @@
         density="compact"
         hide-details
         class="custom-search-text-field"
+        :class="{ 'header-keyword-search': headerSearchActive }"
         @update:model-value="changeTextSearch"
       >
         <template #append>
@@ -47,6 +53,7 @@
           </v-btn>
         </template>
       </v-text-field>
+      </Teleport>
     </v-col>
 
     <div
@@ -131,6 +138,7 @@
                       <template #close>
                         <v-icon
                           v-if="filter.closable"
+                          class="filter-clear-icon"
                           color="grey500"
                           @click="clearFilter(index)"
                         >
@@ -266,6 +274,7 @@
                 <template #close>
                   <v-icon
                     v-if="filter.closable"
+                    class="filter-clear-icon"
                     color="grey500"
                     @click="clearFilter(index)"
                   >
@@ -354,8 +363,12 @@
 </template>
 
 <script setup>
+import { useDisplay } from 'vuetify'
+
 const router = useRouter()
 const route = useRoute()
+const { mdAndUp } = useDisplay()
+const searchHeaderReady = ref(false)
 
 const props = defineProps({
   filterList: {
@@ -367,6 +380,10 @@ const props = defineProps({
     default: () => 0,
   },
   hasKeywordSearch: {
+    type: Boolean,
+    default: false,
+  },
+  keywordSearchInHeader: {
     type: Boolean,
     default: false,
   },
@@ -384,6 +401,7 @@ const props = defineProps({
   },
 })
 
+const headerSearchActive = computed(() => props.keywordSearchInHeader && searchHeaderReady.value && mdAndUp.value)
 const emits = defineEmits(['changeFilter'])
 
 const filters = ref(
@@ -416,6 +434,7 @@ const DOWNWARD_COLLAPSE_THRESHOLD = 80
 const UPWARD_BASELINE_RESET_THRESHOLD = 12
 
 onMounted(async () => {
+  searchHeaderReady.value = true
   await fetchDataRequireFilter()
   await fetchFilterAvailableInQuery()
   await nextTick()
@@ -858,6 +877,15 @@ const clearAllFilter = async () => {
 </script>
 
 <style scoped>
+.header-keyword-search {
+  width: 100%;
+  min-width: 0;
+}
+
+.filter-clear-icon:hover {
+  color: rgb(var(--v-theme-error)) !important;
+}
+
 :deep(.height-badge .v-badge__wrapper .v-badge__badge) {
   height: 20px !important;
 }

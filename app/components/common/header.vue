@@ -78,7 +78,18 @@
           </template>
         </div>
       </div>
-      <div class="d-flex align-center ga-3 action-button">
+      <div
+        class="d-flex align-center ga-3 action-button"
+        :class="{
+          'search-header-actions': route.path === '/search',
+          'search-header-actions-signed-out': route.path === '/search' && !isAuthenticated,
+        }"
+      >
+        <div
+          v-if="route.path === '/search'"
+          id="search-header-keyword"
+          class="search-header-keyword d-none d-md-flex"
+        />
         <v-icon
           :color="menuSetting.linkColor"
           role="button"
@@ -314,6 +325,23 @@ onBeforeUnmount(() => {
 </script>
 
 <style scoped>
+.search-header-actions {
+  flex: 1 1 auto;
+  min-width: 0;
+  justify-content: flex-end;
+}
+.search-header-keyword {
+  box-sizing: border-box;
+  flex: 1 1 430px;
+  max-width: 430px;
+  min-width: 0;
+  padding-left: 100px;
+}
+@media (min-width: 960px) {
+  .search-header-actions-signed-out {
+    column-gap: 60px !important;
+  }
+}
 .main-header{
   height : 64px;
   z-index : 1005;
