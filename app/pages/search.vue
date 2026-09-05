@@ -3,10 +3,10 @@
     <v-row class="justify-center">
       <div class="w-100 d-flex justify-center flex-wrap top-info-div">
         <CommonFilterList
-          :key="activeCategory"
+          :key="activeService"
           :filter-list="filters"
-          :filter-container="CategoryFilterContainer"
-          :style="{ '--search-category-color': activeCategoryColor }"
+          :filter-container="ServicesFilterContainer"
+          :style="{ '--search-service-color': activeServiceColor }"
           :count-data-found="totalDataFind"
           :loading="isInitialDataLoading"
           has-keyword-search
@@ -14,10 +14,11 @@
           desktop-sticky-filters
           @change-filter="changeFilter"
         >
-          <template #category-navigation="{ selectCategory }">
-            <SearchCategoryTabs
-              :active-category="activeCategory"
-              @change="selectCategory"
+          <template #services-navigation="{ selectService }">
+            <SearchServicesTabs
+              :active-service="activeService"
+              :service-counts="serviceResultCounts"
+              @change="selectService"
             />
           </template>
           <template #after-inline-filters>
@@ -38,8 +39,11 @@
                   class="rounded-lg"
                 />
                 <template v-else>
-                  <span class="search-results-count-number">{{ $numberFormat(count) }}</span>
-                  <span class="search-results-count-label">Results</span>
+                  <span
+                    v-if="Number(count) > 0"
+                    class="search-results-count-number"
+                  >{{ $numberFormat(count) }}</span>
+                  <span class="search-results-count-label">{{ getResultLabel(count) }}</span>
                 </template>
               </div>
             </div>
@@ -85,12 +89,18 @@
 </template>
 
 <script setup>
-import CategoryFilterContainer from '~/components/search/CategoryFilterContainer.vue'
+import ServicesFilterContainer from '~/components/search/ServicesFilterContainer.vue'
 import dayjs from 'dayjs'
 import { useRoute } from 'vue-router'
 
 const route = useRoute()
 const router = useRouter()
+
+const getResultLabel = (count) => {
+  const resultCount = Number(count) || 0
+  if (resultCount === 0) return 'No Result'
+  return resultCount === 1 ? 'Result' : 'Results'
+}
 
 const getEquivalentNewType = (type) => {
   switch (type) {
@@ -153,7 +163,7 @@ const getEquivalentOldType = (type) => {
   }
 }
 
-const activeCategory = computed(() => getEquivalentNewType(route.query.type))
+const activeService = computed(() => getEquivalentNewType(route.query.type))
 
 const buildSearchParams = (query, page, perpage) => {
   const frontendType = getEquivalentNewType(query.type)
@@ -213,6 +223,8 @@ const isPreviousLoading = ref(false)
 const data = ref([])
 const isAllDataLoaded = ref(false)
 const totalDataFind = ref(0)
+const serviceResultCounts = ref({})
+let serviceCountRequestId = 0
 const perPage = 10
 const perPageServerSide = 5
 const firstLoadedPageNumber = ref(Number(route.query.page) || 1)
@@ -425,17 +437,49 @@ const specialMonths = {
     { id: 11, title: 'November' },
   ],
 }
-const categoryOptions = [
+const serviceOptions = [
   { title: 'Past Papers', id: 'paper', contentIcon: 'stat-icon icon-paper', color: '#2e90fa' },
   { title: 'Study Materials', id: 'study-materials', icon: '/images/study-materials.svg', iconPadding: 3, color: 'rgb(18, 183, 106)' },
   { title: 'Exam Hub', id: 'quizhub', contentIcon: 'stat-icon icon-exam', color: '#7c4dff' },
   { title: 'Tutorial', id: 'tutorial', contentIcon: 'stat-icon icon-tutorial', color: '#2e90fa' },
 ]
 
-const defaultCategory = categoryOptions[0]
-const activeCategoryColor = computed(() =>
-  (categoryOptions.find(category => category.id === activeCategory.value) || defaultCategory).color,
+const defaultService = serviceOptions[0]
+const activeServiceColor = computed(() =>
+  (serviceOptions.find(service => service.id === activeService.value) || defaultService).color,
 )
+
+const refreshServiceResultCounts = async (query) => {
+  const requestId = ++serviceCountRequestId
+  const selectedService = getEquivalentNewType(query.type)
+  const responses = await Promise.allSettled(
+    serviceOptions.map(async (service) => {
+      const serviceQuery = { ...query, type: service.id }
+      if (
+        service.id !== selectedService
+        && (service.id === 'paper' || service.id === 'study-materials')
+      ) {
+        delete serviceQuery.test_type
+      }
+
+      const params = buildSearchParams(serviceQuery, 1, 1)
+      const response = await useApiService.get('/api/v1/search', params, { public: true })
+      return [service.id, Number.parseInt(response.data?.num) || 0]
+    }),
+  )
+
+  if (requestId !== serviceCountRequestId) return
+
+  const counts = Object.fromEntries(
+    responses
+      .filter(result => result.status === 'fulfilled')
+      .map(result => result.value),
+  )
+  serviceResultCounts.value = {
+    ...serviceResultCounts.value,
+    ...counts,
+  }
+}
 
 const makeFilter = overrides => ({
   selectedItem: null,
@@ -487,19 +531,19 @@ const enrichBoardsWithIcons = async (boards) => {
 }
 
 const filters = computed(() => {
-  const category = activeCategory.value
+  const service = activeService.value
   const conditionalFilters = {
     paper: ['year', 'session', 'paper', 'variant'],
     'study-materials': ['material', 'topic'],
     quizhub: ['topic', 'year', 'session', 'exam-type'],
     tutorial: ['topic'],
-  }[category] || []
+  }[service] || []
 
   const index = {
     board: 0,
     level: 1,
     subject: 2,
-    category: 3,
+    service: 3,
   }
   conditionalFilters.forEach((name, offset) => {
     index[name] = offset + 4
@@ -509,7 +553,7 @@ const filters = computed(() => {
   if (index.paper !== undefined) boardChildren.push(index.paper)
   if (index.material !== undefined) boardChildren.push(index.material)
   const subjectChildren = index.topic === undefined ? [] : [index.topic]
-  const categoryChildren = conditionalFilters.map(name => index[name])
+  const serviceChildren = conditionalFilters.map(name => index[name])
 
   const result = [
     makeFilter({
@@ -549,13 +593,13 @@ const filters = computed(() => {
       children: subjectChildren,
     }),
     makeFilter({
-      title: 'Category',
+      title: 'Services',
       hasSearch: false,
-      staticList: categoryOptions,
+      staticList: serviceOptions,
       queryKey: 'type',
-      children: categoryChildren,
+      children: serviceChildren,
       closable: false,
-      defaultValue: defaultCategory,
+      defaultValue: defaultService,
       showItemIcon: true,
       iconSrc: item => item.icon,
       fallbackIcon: 'md:category',
@@ -577,7 +621,7 @@ const filters = computed(() => {
     }),
     year: () => makeFilter({
       title: 'Year',
-      dependencies: [{ parent: index.category, targetKey: 'type', sourceKey: 'id' }],
+      dependencies: [{ parent: index.service, targetKey: 'type', sourceKey: 'id' }],
       staticList: Array.from({ length: 14 }, (_, i) => 2013 + i)
         .reverse()
         .map(year => ({ title: `${year}`, id: year })),
@@ -596,7 +640,7 @@ const filters = computed(() => {
     }),
     session: () => makeFilter({
       title: 'Session',
-      dependencies: [{ parent: index.category, targetKey: 'type', sourceKey: 'id' }],
+      dependencies: [{ parent: index.service, targetKey: 'type', sourceKey: 'id' }],
       staticList: [],
       dependenciesForGetStaticData: [index.level],
       getStaticList: (id = route.query.base) => {
@@ -655,7 +699,7 @@ const filters = computed(() => {
   return result
 })
 
-const lastRequestedCategory = ref(activeCategory.value)
+const lastRequestedService = ref(activeService.value)
 
 const scrollToPageTop = async () => {
   if (!import.meta.client) return
@@ -669,27 +713,31 @@ const scrollToPageTop = async () => {
   await new Promise(resolve => requestAnimationFrame(resolve))
 }
 
-const changeFilter = async (query) => {
-  lastRequestedCategory.value = getEquivalentNewType(query.type)
+const changeFilter = async (query, _titles, context = {}) => {
+  lastRequestedService.value = getEquivalentNewType(query.type)
   isAllDataLoaded.value = false
   isInitialDataLoading.value = true
   firstLoadedPageNumber.value = 1
   latestLoadedPageNumber.value = 1
   querySearch.value = { ...query, page: 1 }
+  const countsRequest = context.serviceChange
+    ? null
+    : refreshServiceResultCounts(query)
   await scrollToPageTop()
   const responseList = await getDataList()
   data.value = responseList
+  await countsRequest
 }
 
-watch(activeCategory, async (category) => {
-  if (category === lastRequestedCategory.value) return
+watch(activeService, async (service) => {
+  if (service === lastRequestedService.value) return
 
-  lastRequestedCategory.value = category
+  lastRequestedService.value = service
   isAllDataLoaded.value = false
   isInitialDataLoading.value = true
   firstLoadedPageNumber.value = 1
   latestLoadedPageNumber.value = 1
-  querySearch.value = { ...route.query, type: category, page: 1 }
+  querySearch.value = { ...route.query, type: service, page: 1 }
   await scrollToPageTop()
   data.value = await getDataList()
 })
@@ -902,6 +950,7 @@ const createLinkAddConent = () => {
 }
 
 onMounted(() => {
+  refreshServiceResultCounts(route.query)
   const oldType = ['test', 'learnfiles', 'azmoon', 'question', 'dars']
   const normalizedType = getEquivalentNewType(route.query.type)
   if (!route.query.type || oldType.includes(route.query.type)) {
@@ -925,6 +974,8 @@ onMounted(() => {
 
 :deep(.inline-filter-group) {
   border: 0;
+  margin-top: 8px;
+  padding-top: 8px;
   max-width: 100%;
   flex-direction: row;
   align-items: stretch;

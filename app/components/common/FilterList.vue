@@ -4,8 +4,8 @@
     :class="{ 'filter-list-sticky-host': stickyContent }"
   >
     <slot
-      name="category-navigation"
-      :select-category="selectCategory"
+      name="services-navigation"
+      :select-service="selectService"
     />
     <v-col
       :cols="hasKeywordSearch ? `4` : `12`"
@@ -23,6 +23,7 @@
       cols="8"
       md="12"
       class="d-flex justify-end justify-md-center"
+      :class="{ 'header-search-teleport-source': keywordSearchInHeader }"
     >
       <Teleport
         :to="headerSearchActive ? '#search-header-keyword' : null"
@@ -91,13 +92,15 @@
               :style="filterContainer ? undefined : { display: 'contents' }"
             >
             <div
-              class="w-100 d-none d-md-flex justify-center align-center flex-wrap ga-4 mt-2"
+              class="w-100 d-none d-md-flex justify-center align-center flex-wrap ga-4"
+              :class="{ 'mt-2': !filterContainer }"
+              :style="filterContainer ? { marginTop: '16px' } : undefined"
             >
               <div class="d-flex flex-wrap w-100 max-width-container justify-start ga-2">
                 <div
                   v-for="(filter, index) in filters"
                   :key="filter.title || index"
-                  :style="{ display: $slots['category-navigation'] && filter.queryKey === 'type' ? 'none' : 'contents' }"
+                  :style="{ display: $slots['services-navigation'] && filter.queryKey === 'type' ? 'none' : 'contents' }"
                 >
                   <CommonChipSelectFilter
                     v-if="!filter.inlineOptions"
@@ -131,7 +134,7 @@
                     :disabled="filter.disabled"
                     :has-search="filter.hasSearch"
                     @update-selected-item="updateSelectedItem($event, index)"
-                    @clear="clearDropdownFilter(index)"
+                    @clear="clearFilter(index)"
                   />
                 </div>
               </div>
@@ -308,7 +311,7 @@
               :key="filter.title || index"
             >
               <div
-                v-if="!filter.inlineOptions"
+                v-if="!filter.inlineOptions && !($slots['services-navigation'] && filter.queryKey === 'type')"
                 :class="`w-100 d-flex justify-space-between align-center flex-wrap pt-2 pb-2 ${
                   filter.disabled ? `opacity-20 cursor-not-allowed` : ``
                 }`"
@@ -434,6 +437,7 @@ const countFilterSelect = ref(Object.keys(route.query).length)
 const textSearch = ref(route.query.title ? route.query.title : '')
 const timer = ref(null)
 const hasExclusiveDisabledState = ref(false)
+let pendingServiceChange = false
 const filterControlsShell = ref(null)
 const filterControls = ref(null)
 const filterControlsContent = ref(null)
@@ -490,13 +494,17 @@ const updateSelectedItem = async (itemSelected, index) => {
   }
 }
 
-const selectCategory = (categoryId) => {
+const selectService = (serviceId) => {
   const index = filters.value.findIndex(filter => filter.queryKey === 'type')
   const filter = filters.value[index]
-  const category = filter?.staticList?.find(item => item.id === categoryId)
-  if (!category || filter.selectedItem?.id === categoryId) return
+  const service = filter?.staticList?.find(item => item.id === serviceId)
+  if (!service || filter.selectedItem?.id === serviceId) return
 
-  return updateSelectedItem(category, index)
+  pendingServiceChange = true
+  return updateSelectedItem(service, index)
+    .finally(() => {
+      pendingServiceChange = false
+    })
 }
 
 const isExclusiveFilterSelected = (index) => {
@@ -637,18 +645,8 @@ const clearFilter = (index) => {
   updateQueryFromFilters()
 }
 
-const clearDropdownFilter = (index) => {
-  const filter = filters.value[index]
-  if (!filter?.selectedItem || !filter.closable || filter.defaultValue) return
-
-  filter.selectedItem = null
-
-  const query = { ...route.query }
-  delete query[filter.queryKey]
-  updateQueryFromFilters(query)
-}
-
-const updateQueryFromFilters = async (query = {}) => {
+const updateQueryFromFilters = async () => {
+  const query = {}
   const titles = {}
 
   filters.value.forEach((f) => {
@@ -666,7 +664,7 @@ const updateQueryFromFilters = async (query = {}) => {
 
   countFilterSelect.value = Object.keys(query).length
   router.replace({ query })
-  emits('changeFilter', query, titles)
+  emits('changeFilter', query, titles, { serviceChange: pendingServiceChange })
 }
 
 const fetchDataRequireFilter = async () => {
@@ -918,6 +916,12 @@ const clearAllFilter = async () => {
 .header-keyword-search {
   width: 100%;
   min-width: 0;
+}
+
+@media (min-width: 960px) {
+  .header-search-teleport-source {
+    display: none !important;
+  }
 }
 
 .filter-clear-icon:hover {

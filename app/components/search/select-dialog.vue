@@ -17,16 +17,20 @@
           cols="6"
           class="d-flex align-center justify-end ga-2"
         >
-          <span
-            v-if="hasSearch"
-            class="text-h5 text-grey400"
-          >result</span>
-          <span
-            v-if="hasSearch"
-            class="text-h4 text-green font-weight-bold"
-          >{{
-            filteredItems.length
-          }}</span>
+          <div
+            v-if="hasSearch && compactResultCount"
+            class="select-dialog-result-count"
+          >
+            <span
+              v-if="filteredItems.length > 0"
+              class="select-dialog-result-count__number"
+            >{{ filteredItems.length }}</span>
+            <span class="select-dialog-result-count__label">{{ filteredResultLabel }}</span>
+          </div>
+          <template v-else-if="hasSearch">
+            <span class="text-h5 text-grey400">result</span>
+            <span class="text-h4 text-green font-weight-bold">{{ filteredItems.length }}</span>
+          </template>
           <v-icon
             class="ml-4"
             size="x-large"
@@ -239,6 +243,10 @@ const props = defineProps({
     type: Boolean,
     default: true,
   },
+  compactResultCount: {
+    type: Boolean,
+    default: false,
+  },
   showItemIcon: {
     type: Boolean,
     default: false,
@@ -262,6 +270,14 @@ const emit = defineEmits(['update:showDialog', 'changeSelectedItem'])
 // Start Section Search Item In List
 const searchText = ref('')
 const failedIconIds = ref(new Set())
+
+watch(
+  () => props.showDialog,
+  (isOpen) => {
+    if (!isOpen) searchText.value = ''
+  },
+)
+
 const getIconSrc = item => props.iconSrc?.(item) || item.icon
 const markIconFailed = (item) => {
   failedIconIds.value = new Set([
@@ -274,6 +290,10 @@ const filteredItems = computed(() => {
   return props.items.filter(item =>
     item.title.toLowerCase().includes(searchText.value.toLowerCase()),
   )
+})
+const filteredResultLabel = computed(() => {
+  if (filteredItems.value.length === 0) return 'No Result'
+  return filteredItems.value.length === 1 ? 'Result' : 'Results'
 })
 const _highlightSearchText = (text) => {
   if (!searchText.value) return text
@@ -309,6 +329,27 @@ const clickOnModal = (event) => {
 </script>
 
 <style scoped>
+.select-dialog-result-count {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 4px;
+  white-space: nowrap;
+}
+
+.select-dialog-result-count__number {
+  color: #397f7b;
+  font-size: 18px;
+  font-weight: 700;
+  line-height: 24px;
+}
+
+.select-dialog-result-count__label {
+  color: rgb(var(--v-theme-grey700));
+  font-size: 13px;
+  font-weight: 500;
+  line-height: 20px;
+}
+
 .size-icon {
   font-size: 24px;
   margin-right: 12px;

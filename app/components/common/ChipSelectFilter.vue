@@ -178,6 +178,7 @@
     :items="items"
     :selected-item="selectedItem"
     :has-search="hasSearch"
+    :compact-result-count="boxed"
     :show-item-icon="showItemIcon"
     :icon-src="iconSrc"
     :fallback-icon="fallbackIcon"

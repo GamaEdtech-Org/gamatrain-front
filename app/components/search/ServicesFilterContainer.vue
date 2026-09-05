@@ -1,15 +1,15 @@
 <template>
   <section
-    id="search-category-filters"
-    class="category-filter-container"
-    aria-label="Filters for the selected category"
+    id="search-service-filters"
+    class="services-filter-container"
+    aria-label="Filters for the selected service"
   >
     <slot />
   </section>
 </template>
 
 <style scoped>
-.category-filter-container {
+.services-filter-container {
   box-sizing: border-box;
   display: flex;
   width: 100%;
@@ -17,7 +17,7 @@
   min-width: 0;
   flex-wrap: wrap;
   justify-content: center;
-  padding: 16px;
+  padding: 0 16px 16px;
   border: 0;
   background: rgb(var(--v-theme-surface));
 }
