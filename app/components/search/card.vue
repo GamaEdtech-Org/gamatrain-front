@@ -32,8 +32,8 @@
             <v-img
               :src="information.avatar || '/images/default-user.svg'"
               :alt="publisherName"
-              width="34"
-              height="34"
+              width="26"
+              height="26"
               cover
               class="publisher-avatar rounded-circle flex-shrink-0"
             />
@@ -44,7 +44,7 @@
             class="card-indicators d-none d-md-flex align-center flex-shrink-0"
             aria-label="Resource information"
           >
-            <DifficultyIndicator :level="information.level" :size="28" />
+            <DifficultyIndicator :level="information.level" :size="16" />
             <span class="indicator indicator-library" title="Resource available">
               <img :src="libraryCheckIcon" alt="" class="status-icon">
             </span>
@@ -65,7 +65,7 @@
             <span class="indicator indicator-fire" title="Featured resource">
               <img :src="fireCardIcon" alt="" class="status-icon">
             </span>
-            <QualityIndicator :score="qualityScore" :size="28" />
+            <QualityIndicator :score="qualityScore" :size="16" />
           </div>
         </div>
 
@@ -112,49 +112,49 @@
           </v-chip>
         </div>
 
-        <div class="metadata d-flex align-center flex-wrap ga-4 mt-auto text-grey500">
+        <div class="metadata d-flex align-center flex-wrap ga-4 text-grey500">
           <span
             v-if="information.ext && route.query.type == 'learnfiles'"
             class="metadata-item"
           >
-            <v-icon size="18" color="grey300">md:sticky_note_outlined</v-icon>
+            <v-icon size="12" color="grey300">md:sticky_note_outlined</v-icon>
             {{ information.ext }}
           </span>
           <span v-if="information.test_type_title" class="metadata-item">
-            <v-icon size="18" color="grey300">md:folder_outlined</v-icon>
+            <v-icon size="12" color="grey300">md:folder_outlined</v-icon>
             {{ information.test_type_title }}
           </span>
           <span
             v-if="information.tests_num && route.query.type == 'azmoon'"
             class="metadata-item"
           >
-            <v-icon size="18" color="grey300">md:list</v-icon>
+            <v-icon size="12" color="grey300">md:list</v-icon>
             {{ information.tests_num }}
           </span>
           <span v-if="information.views" class="metadata-item">
-            <v-icon size="18" color="grey300">md:visibility_outlined</v-icon>
+            <v-icon size="12" color="grey300">md:visibility_outlined</v-icon>
             {{ information.views }}
           </span>
           <span
             v-if="information.reply_num && route.query.type == 'question'"
             class="metadata-item"
           >
-            <v-icon size="18" color="grey300">md:reply</v-icon>
+            <v-icon size="12" color="grey300">md:reply</v-icon>
             {{ information.reply_num }}
           </span>
           <span class="metadata-item">
-            <v-icon size="18" color="grey300">md:calendar_month_outlined</v-icon>
+            <v-icon size="12" color="grey300">md:calendar_month_outlined</v-icon>
             {{ formattedDate }}
           </span>
         </div>
 
         <div class="card-indicators mobile-indicators d-flex d-md-none align-center">
-          <DifficultyIndicator :level="information.level" :size="24" />
+          <DifficultyIndicator :level="information.level" :size="16" />
           <span class="indicator indicator-library"><img :src="libraryCheckIcon" alt="" class="status-icon"></span>
           <span class="indicator indicator-pdf" :class="{ 'indicator-muted': !information.q_file }"><img :src="pdfCardIcon" alt="" class="status-icon"></span>
           <span class="indicator indicator-word" :class="{ 'indicator-muted': !information.q_file_word }"><img :src="wordCardIcon" alt="" class="status-icon"></span>
           <span class="indicator indicator-fire"><img :src="fireCardIcon" alt="" class="status-icon"></span>
-          <QualityIndicator :score="qualityScore" :size="24" />
+          <QualityIndicator :score="qualityScore" :size="16" />
         </div>
       </div>
     </div>
@@ -276,6 +276,7 @@ const openCard = (event) => {
   overflow: hidden;
   height: 174px;
   max-width: 1200px;
+  cursor: pointer;
   border: 1px solid rgb(var(--v-theme-grey200));
   background: #fff;
   transition: border-color 180ms ease, box-shadow 180ms ease, transform 180ms ease;
@@ -290,18 +291,19 @@ const openCard = (event) => {
 .card-content {
   height: 100%;
   min-height: 0;
-  padding: 12px;
+  padding: 0;
   color: inherit;
 }
 
 .cover-wrap {
-  width: 126px;
-  min-width: 126px;
-  height: 148px;
-  min-height: 148px;
-  max-height: 148px;
+  width: auto;
+  min-width: 0;
+  height: 100%;
+  min-height: 100%;
+  max-height: 100%;
+  aspect-ratio: 63 / 74;
   overflow: hidden;
-  border-radius: 10px;
+  border-radius: 23px 0 0 23px;
   background: #f9f3f3;
 }
 
@@ -318,47 +320,57 @@ const openCard = (event) => {
 
 .card-body {
   flex: 1;
-  padding: 2px 8px 2px 16px;
+  padding: 16px 16px 8px;
 }
 
 .min-width-0 { min-width: 0; }
 
 .publisher-avatar { border: 1px solid rgb(var(--v-theme-grey100)); }
 
+.card-top { margin-bottom: 12px; }
+
 .publisher-name {
   max-width: 260px;
   color: rgb(var(--v-theme-grey700));
-  font-size: 14px;
-  font-weight: 600;
+  font-size: 12px;
+  font-weight: 500;
+  line-height: 18px;
 }
 
 .card-title {
   max-width: 100%;
-  margin-top: 6px;
-  font-size: 18px;
-  line-height: 26px;
+  margin: 0 0 12px;
+  font-size: 14px;
+  line-height: 24px;
 }
 
 .card-description {
   max-width: 100%;
-  margin-top: 1px;
-  font-size: 13px;
-  line-height: 20px;
+  margin: 0;
+  font-size: 12px;
+  line-height: 18px;
 }
 
-.subject-tags { margin-top: 6px; }
+.subject-tags {
+  gap: 4px !important;
+  margin-block: 8px;
+}
 
 .tag-chip {
   z-index: 2;
-  height: 25px;
-  padding-inline: 10px !important;
-  font-size: 12px;
+  height: 22px;
+  padding: 4px !important;
+  border-radius: 4px !important;
+  font-size: 10px;
+  line-height: 14px;
 }
 
 .metadata {
-  min-height: 22px;
-  padding-top: 8px;
-  font-size: 12px;
+  gap: 8px !important;
+  min-height: 18px;
+  padding-top: 0;
+  font-size: 10px;
+  line-height: 15px;
 }
 
 .metadata-item {
@@ -367,12 +379,12 @@ const openCard = (event) => {
   gap: 4px;
 }
 
-.card-indicators { gap: 18px; }
+.card-indicators { gap: 8px; }
 
 .indicator {
   display: inline-flex;
-  width: 28px;
-  height: 28px;
+  width: 16px;
+  height: 16px;
   align-items: center;
   justify-content: center;
 }
@@ -386,40 +398,34 @@ const openCard = (event) => {
 .indicator-muted { opacity: 0.32; }
 
 .mobile-indicators {
-  gap: 12px;
+  gap: 8px;
   margin-top: 10px;
+}
+
+@media (min-width: 960px) {
+  .card-indicators { gap: 24px; }
+}
+
+@media (min-width: 1280px) {
+  .card-title { font-size: 18px; }
+
+  .metadata {
+    gap: 40px !important;
+    font-size: 12px;
+    line-height: 18px;
+  }
 }
 
 @media (max-width: 959px) {
   .card-search { height: 156px; }
-
-  .cover-wrap {
-    width: 112px;
-    min-width: 112px;
-    height: 130px;
-    min-height: 130px;
-    max-height: 130px;
-  }
 }
 
 @media (max-width: 599px) {
   .card-search { height: 134px; }
 
-  .card-content { padding: 10px; }
-
-  .cover-wrap {
-    width: 88px;
-    min-width: 88px;
-    height: 112px;
-    min-height: 112px;
-    max-height: 112px;
-  }
-
-  .card-body { padding: 0 0 0 10px; }
-
   .publisher-avatar {
-    width: 28px !important;
-    height: 28px !important;
+    width: 26px !important;
+    height: 26px !important;
   }
 
   .publisher-name {
@@ -428,9 +434,8 @@ const openCard = (event) => {
   }
 
   .card-title {
-    margin-top: 4px;
-    font-size: 15px;
-    line-height: 22px;
+    font-size: 14px;
+    line-height: 24px;
   }
 
   .card-description {
@@ -443,9 +448,6 @@ const openCard = (event) => {
     overflow: hidden;
   }
 
-  .metadata {
-    gap: 8px !important;
-    padding-top: 6px;
-  }
+  .metadata { gap: 8px !important; }
 }
 </style>

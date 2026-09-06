@@ -979,7 +979,7 @@ const clearAllFilter = async () => {
   max-width: 1200px;
   flex-direction: column;
   align-items: flex-start;
-  padding: 16px 24px;
+  padding: 16px 24px 0 0;
   margin-right: auto;
   margin-top: 16px;
   background: rgb(var(--v-theme-surface));

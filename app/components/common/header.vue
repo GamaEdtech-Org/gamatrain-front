@@ -86,9 +86,9 @@
         }"
       >
         <div
-          v-if="route.path === '/search'"
           id="search-header-keyword"
           class="search-header-keyword d-none d-md-flex"
+          :class="{ 'search-header-keyword-hidden': route.path !== '/search' }"
         />
         <v-icon
           :color="menuSetting.linkColor"
@@ -336,6 +336,9 @@ onBeforeUnmount(() => {
   max-width: 430px;
   min-width: 0;
   padding-left: 100px;
+}
+.search-header-keyword-hidden {
+  display: none !important;
 }
 @media (min-width: 960px) {
   .search-header-actions-signed-out {

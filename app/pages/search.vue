@@ -22,7 +22,7 @@
             />
           </template>
           <template #after-inline-filters>
-            <div class="w-100 d-flex align-start justify-start max-width-container">
+            <div class="subject-directory-container w-100 d-flex align-start justify-start max-width-container">
               <CommonDetailSubjectDirectoryNav :content-data="data[0]" />
             </div>
           </template>
@@ -965,6 +965,9 @@ onMounted(() => {
 </script>
 
 <style scoped>
+.subject-directory-container {
+  padding-top: 16px;
+}
 .top-info-div {
   display: contents !important;
 }
@@ -1040,19 +1043,19 @@ onMounted(() => {
 }
 .search-results-heading {
   min-width: 0;
-  margin-bottom: 16px;
+  margin: 4px 0 2px;
 }
 .search-results-title {
   min-width: 0;
   margin: 0;
-  font-size: 24px;
+  font-size: 20px;
   font-weight: 700;
   line-height: 32px;
   text-align: left;
 }
 .search-results-count-number {
   color: #397f7b;
-  font-size: 24px;
+  font-size: 20px;
   font-weight: 700;
   line-height: 32px;
 }

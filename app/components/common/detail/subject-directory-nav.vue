@@ -49,12 +49,12 @@ defineProps({
 .subject-directory-card {
   display: flex;
   width: 100%;
-  min-height: 96px;
+  min-height: 0;
   align-items: center;
   justify-content: space-between;
   gap: 24px;
-  padding: 20px;
-  margin-top: 8px;
+  padding: 8px 20px;
+  margin-top: 0;
   color: #111827;
   text-decoration: none;
   background: #f2f9f8;
@@ -116,7 +116,7 @@ defineProps({
 .subject-directory-card__title {
   overflow: hidden;
   color: #0b0b0b;
-  font-size: 22px;
+  font-size: 20px;
   font-weight: 700;
   line-height: 28px;
   text-overflow: ellipsis;
@@ -151,7 +151,7 @@ defineProps({
     align-items: flex-start;
     flex-wrap: wrap;
     gap: 14px;
-    padding: 16px;
+    padding: 8px 16px;
   }
 
   .subject-directory-card__main {

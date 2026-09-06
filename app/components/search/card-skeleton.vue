@@ -7,7 +7,7 @@
     <div class="skeleton-body d-flex flex-column flex-grow-1">
       <div class="d-flex justify-space-between align-center ga-4">
         <div class="d-flex align-center ga-2">
-          <v-skeleton-loader type="avatar" width="34" height="34" />
+          <v-skeleton-loader type="avatar" width="26" height="26" />
           <v-skeleton-loader type="text" width="120" />
         </div>
         <v-skeleton-loader
@@ -23,46 +23,41 @@
         <v-skeleton-loader type="chip" width="86" />
         <v-skeleton-loader type="chip" width="120" />
       </div>
-      <v-skeleton-loader type="text" width="340" class="mt-auto" />
+      <v-skeleton-loader type="text" width="340" />
     </div>
   </div>
 </template>
 
 <style scoped>
 .card-skeleton {
-  min-height: 168px;
+  height: 174px;
   max-width: 1200px;
-  padding: 12px;
+  padding: 0;
   border: 1px solid rgb(var(--v-theme-grey200));
   background: #fff;
 }
 
 .skeleton-cover {
-  width: 126px;
-  min-width: 126px;
-  min-height: 144px;
+  width: auto;
+  min-width: 0;
+  height: 100%;
+  min-height: 100%;
+  max-height: 100%;
+  aspect-ratio: 63 / 74;
   overflow: hidden;
-  border-radius: 10px;
+  border-radius: 23px 0 0 23px;
 }
 
 .skeleton-body {
-  gap: 6px;
+  gap: 4px;
   min-width: 0;
-  padding: 2px 8px 2px 16px;
+  padding: 16px 16px 8px;
 }
 
 @media (max-width: 599px) {
   .card-skeleton {
-    min-height: 134px;
-    padding: 10px;
+    height: 134px;
   }
 
-  .skeleton-cover {
-    width: 88px;
-    min-width: 88px;
-    min-height: 112px;
-  }
-
-  .skeleton-body { padding-left: 10px; }
 }
 </style>
