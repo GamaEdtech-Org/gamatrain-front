@@ -277,15 +277,22 @@ const openCard = (event) => {
   height: 174px;
   max-width: 1200px;
   cursor: pointer;
-  border: 1px solid rgb(var(--v-theme-grey200));
-  background: #fff;
+  border: 1px solid #dcdde5;
+  border-radius: 16px !important;
+  background: #ffffff;
+  box-shadow: 0 1px 2px rgb(36 41 47 / 8%);
   transition: border-color 180ms ease, box-shadow 180ms ease, transform 180ms ease;
 }
 
 .card-search:hover {
-  border-color: #7dbfba;
-  box-shadow: 0 8px 24px rgb(57 127 123 / 10%);
-  transform: translateY(-1px);
+  border-color: #dfb536;
+  box-shadow: 0 6px 18px rgb(36 41 47 / 14%);
+  transform: translateY(-2px);
+}
+
+.card-search:focus-visible {
+  outline: 3px solid rgb(242 201 76 / 34%);
+  outline-offset: 2px;
 }
 
 .card-content {
@@ -303,8 +310,8 @@ const openCard = (event) => {
   max-height: 100%;
   aspect-ratio: 63 / 74;
   overflow: hidden;
-  border-radius: 23px 0 0 23px;
-  background: #f9f3f3;
+  border-radius: 15px 0 0 15px;
+  background: #fff3c4;
 }
 
 .cover-image,
@@ -325,30 +332,33 @@ const openCard = (event) => {
 
 .min-width-0 { min-width: 0; }
 
-.publisher-avatar { border: 1px solid rgb(var(--v-theme-grey100)); }
+.publisher-avatar { border: 1px solid #dcdde5; }
 
-.card-top { margin-bottom: 12px; }
+.card-top { margin-bottom: 8px; }
 
 .publisher-name {
   max-width: 260px;
-  color: rgb(var(--v-theme-grey700));
-  font-size: 12px;
-  font-weight: 500;
+  color: #65697a;
+  font-size: 13px;
+  font-weight: 600;
   line-height: 18px;
 }
 
 .card-title {
   max-width: 100%;
   margin: 0 0 12px;
-  font-size: 14px;
-  line-height: 24px;
+  color: #202238 !important;
+  font-size: 18px;
+  font-weight: 650 !important;
+  line-height: 26px;
 }
 
 .card-description {
   max-width: 100%;
   margin: 0;
-  font-size: 12px;
-  line-height: 18px;
+  color: #65697a !important;
+  font-size: 13px;
+  line-height: 20px;
 }
 
 .subject-tags {
@@ -358,19 +368,20 @@ const openCard = (event) => {
 
 .tag-chip {
   z-index: 2;
-  height: 22px;
-  padding: 4px !important;
-  border-radius: 4px !important;
-  font-size: 10px;
-  line-height: 14px;
+  height: 24px;
+  padding: 4px 8px !important;
+  border-radius: 6px !important;
+  font-size: 11px;
+  line-height: 16px;
 }
 
 .metadata {
-  gap: 8px !important;
+  gap: 12px !important;
   min-height: 18px;
   padding-top: 0;
-  font-size: 10px;
-  line-height: 15px;
+  color: #65697a;
+  font-size: 12px;
+  line-height: 18px;
 }
 
 .metadata-item {
@@ -407,12 +418,8 @@ const openCard = (event) => {
 }
 
 @media (min-width: 1280px) {
-  .card-title { font-size: 18px; }
-
   .metadata {
-    gap: 40px !important;
-    font-size: 12px;
-    line-height: 18px;
+    gap: 20px !important;
   }
 }
 
@@ -435,7 +442,7 @@ const openCard = (event) => {
 
   .card-title {
     font-size: 14px;
-    line-height: 24px;
+    line-height: 20px;
   }
 
   .card-description {

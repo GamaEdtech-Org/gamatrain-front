@@ -6,12 +6,12 @@
     @click="clickOnOverlay"
   >
     <div
-      class="w-100 d-flex flex-wrap flex-column bg-white pa-6 rounded-xl mobile-style"
+      class="select-dialog-panel w-100 d-flex flex-wrap flex-column bg-white pa-6 mobile-style"
       @click="clickOnModal"
     >
       <v-row>
         <v-col cols="6">
-          <span class="text-h3 text-grey700">{{ titleModal }}</span>
+          <span class="select-dialog-title">{{ titleModal }}</span>
         </v-col>
         <v-col
           cols="6"
@@ -32,9 +32,8 @@
             <span class="text-h4 text-green font-weight-bold">{{ filteredItems.length }}</span>
           </template>
           <v-icon
-            class="ml-4"
+            class="select-dialog-close ml-4"
             size="x-large"
-            color="grey300"
             @click="closeModal"
           >
             md:cancel
@@ -51,15 +50,15 @@
           prepend-inner-icon="md:search"
           glow
           variant="outlined"
-          color="primary"
-          icon-color="primary"
+          color="#F2C94C"
+          icon-color="#171633"
           density="compact"
           rounded="xl"
         >
           <template #append-inner>
             <v-btn
               class="mr-n3"
-              color="primary"
+              color="#F2C94C"
               width="70"
               height="30"
               rounded="xl"
@@ -78,7 +77,7 @@
           :key="item.title"
           :value="item.title"
           :active="item.id == selectedItem?.id"
-          color="primary"
+          color="#F2C94C"
           @click="changeSelectedItem(item)"
         >
           <template #prepend>
@@ -139,14 +138,14 @@
         <v-progress-circular
           indeterminate
           :width="3"
-          color="primary"
+          color="#F2C94C"
         />
       </div>
 
       <v-alert
         v-if="searchText && filteredItems.length === 0 && !isLoading"
         type="info"
-        color="primary"
+        color="#F2C94C"
         density="compact"
         class="mb-4"
         variant="tonal"
@@ -159,7 +158,7 @@
           searchText.length == 0 && filteredItems.length === 0 && !isLoading
         "
         type="info"
-        color="primary"
+        color="#F2C94C"
         density="compact"
         class="mb-4"
         variant="tonal"
@@ -329,6 +328,29 @@ const clickOnModal = (event) => {
 </script>
 
 <style scoped>
+.select-dialog-panel {
+  color: #202238;
+  border: 1px solid #dcdde5;
+  border-radius: 16px;
+  box-shadow: 0 12px 32px rgb(36 41 47 / 18%);
+}
+
+.select-dialog-title {
+  color: #202238;
+  font-size: 20px;
+  font-weight: 700;
+  line-height: 28px;
+}
+
+.select-dialog-close {
+  color: #65697a;
+  cursor: pointer;
+}
+
+.select-dialog-close:hover {
+  color: #c93c37;
+}
+
 .select-dialog-result-count {
   display: inline-flex;
   align-items: baseline;
@@ -337,14 +359,14 @@ const clickOnModal = (event) => {
 }
 
 .select-dialog-result-count__number {
-  color: #397f7b;
+  color: #202238;
   font-size: 18px;
   font-weight: 700;
   line-height: 24px;
 }
 
 .select-dialog-result-count__label {
-  color: rgb(var(--v-theme-grey700));
+  color: #65697a;
   font-size: 13px;
   font-weight: 500;
   line-height: 20px;

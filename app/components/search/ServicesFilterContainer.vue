@@ -17,8 +17,8 @@
   min-width: 0;
   flex-wrap: wrap;
   justify-content: center;
-  padding: 0 16px;
+  padding: 0 20px 16px;
   border: 0;
-  background: rgb(var(--v-theme-surface));
+  background: transparent;
 }
 </style>

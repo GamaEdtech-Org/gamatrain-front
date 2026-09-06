@@ -72,13 +72,13 @@
         <v-btn
           class="text-h5 font-weight-bold"
           width="250"
-          color="info"
+          color="#F2C94C"
           rounded="pill"
           flat
           variant="tonal"
           @click="createLinkAddConent()"
         >
-          <v-icon color="info">
+          <v-icon color="#171633">
             md:add
           </v-icon>
           Add
@@ -438,10 +438,10 @@ const specialMonths = {
   ],
 }
 const serviceOptions = [
-  { title: 'Past Papers', id: 'paper', contentIcon: 'stat-icon icon-paper', color: '#2e90fa' },
-  { title: 'Study Materials', id: 'study-materials', icon: '/images/study-materials.svg', iconPadding: 3, color: 'rgb(18, 183, 106)' },
-  { title: 'Exam Hub', id: 'quizhub', contentIcon: 'stat-icon icon-exam', color: '#7c4dff' },
-  { title: 'Tutorial', id: 'tutorial', contentIcon: 'stat-icon icon-tutorial', color: '#2e90fa' },
+  { title: 'Past Papers', id: 'paper', contentIcon: 'stat-icon icon-paper', color: '#171633' },
+  { title: 'Study Materials', id: 'study-materials', icon: '/images/study-materials.svg', iconPadding: 3, color: '#171633' },
+  { title: 'Exam Hub', id: 'quizhub', contentIcon: 'stat-icon icon-exam', color: '#171633' },
+  { title: 'Tutorial', id: 'tutorial', contentIcon: 'stat-icon icon-tutorial', color: '#171633' },
 ]
 
 const defaultService = serviceOptions[0]
@@ -973,16 +973,21 @@ onMounted(() => {
 }
 .margin-top-handle {
   min-height: 100vh;
+  color: #202238;
+  background: #f7f7f4;
 }
 
 :deep(.inline-filter-group) {
-  border: 0;
-  margin-top: 8px;
-  padding-top: 8px;
+  border: 1px solid #dcdde5;
+  margin-top: 12px;
+  padding: 12px 16px;
   max-width: 100%;
   flex-direction: row;
   align-items: stretch;
   gap: 24px;
+  border-radius: 12px;
+  background: #ffffff;
+  box-shadow: 0 1px 2px rgb(36 41 47 / 8%);
 }
 
 :deep(.inline-filter-group > .inline-filter-grouped-row) {
@@ -994,7 +999,7 @@ onMounted(() => {
 
 :deep(.inline-filter-group > .inline-filter-grouped-row + .inline-filter-grouped-row) {
   padding-left: 24px;
-  border-left: 1px solid rgb(var(--v-theme-grey300));
+  border-left: 1px solid #dcdde5;
 }
 
 :deep(.inline-filter-grouped-row .inline-filter-row-content) {
@@ -1009,8 +1014,8 @@ onMounted(() => {
 
 :deep(.inline-filter-group .inline-filter-option:not(.inline-filter-option-selected):not(:disabled):hover) {
   --v-hover-opacity: 0;
-  border-color: #397f7b !important;
-  background-color: #f2f9f8 !important;
+  border-color: #dfb536 !important;
+  background-color: #fff3c4 !important;
 }
 
 @media (max-width: 959px) {
@@ -1022,7 +1027,7 @@ onMounted(() => {
   :deep(.inline-filter-group > .inline-filter-grouped-row + .inline-filter-grouped-row) {
     padding-top: 16px;
     padding-left: 0;
-    border-top: 1px solid rgb(var(--v-theme-grey300));
+    border-top: 1px solid #dcdde5;
     border-left: 0;
   }
 }
@@ -1043,27 +1048,29 @@ onMounted(() => {
 }
 .search-results-heading {
   min-width: 0;
-  margin: 4px 0 2px;
+  padding: 12px 0 8px;
+  margin: 0;
 }
 .search-results-title {
   min-width: 0;
   margin: 0;
-  font-size: 20px;
+  color: #202238;
+  font-size: 22px;
   font-weight: 700;
-  line-height: 32px;
+  line-height: 30px;
   text-align: left;
 }
 .search-results-count-number {
-  color: #397f7b;
-  font-size: 20px;
+  color: #202238;
+  font-size: 22px;
   font-weight: 700;
-  line-height: 32px;
+  line-height: 30px;
 }
 .search-results-count-label {
-  color: rgb(var(--v-theme-grey700));
-  font-size: 16px;
+  color: #65697a;
+  font-size: 14px;
   font-weight: 500;
-  line-height: 24px;
+  line-height: 20px;
 }
 
 </style>

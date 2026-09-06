@@ -436,8 +436,20 @@ defineExpose({
   height: 52px !important;
   justify-content: space-between;
   padding-inline: 16px;
-  background: rgb(var(--v-theme-surface));
-  border-color: rgb(var(--v-theme-grey300)) !important;
+  color: #202238;
+  background: #ffffff;
+  border-color: #dcdde5 !important;
+  border-radius: 12px !important;
+  transition: background-color 160ms ease, border-color 160ms ease, box-shadow 160ms ease;
+}
+
+.search-filter-control:hover {
+  background: #fff3c4;
+  border-color: #dfb536 !important;
+}
+
+.search-filter-control:focus-visible {
+  box-shadow: 0 0 0 3px rgb(242 201 76 / 28%);
 }
 
 .search-filter-icon {
@@ -512,20 +524,21 @@ defineExpose({
 .search-filter-label {
   font-size: 12px;
   font-weight: 500;
-  color: rgb(var(--v-theme-grey500));
+  color: #65697a;
 }
 
 .search-filter-empty .search-filter-label {
   font-size: 16px;
-  font-weight: 500;
-  color: rgb(var(--v-theme-grey700));
+  font-weight: 600;
+  color: #202238;
 }
 
 .search-filter-value {
   max-width: 120px;
   overflow: hidden;
   font-size: 14px;
-  font-weight: 600;
+  font-weight: 650;
+  color: #202238;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
@@ -543,20 +556,20 @@ defineExpose({
 }
 
 .open-style-btn {
-  background-color: #fff8e8;
-  border: 1px solid #ffebb9;
+  background-color: #fff3c4;
+  border: 1px solid #f2c94c;
 }
 
 .dependent-selected-btn {
-  color: #397f7b !important;
-  background-color: #f2f9f8 !important;
-  border-color: #7dbfba !important;
+  color: #202238 !important;
+  background-color: #fff3c4 !important;
+  border-color: #f2c94c !important;
 }
 
 .dependent-selected-btn .search-filter-label,
 .dependent-selected-btn .search-filter-value,
 .dependent-selected-btn .v-icon {
-  color: #397f7b !important;
+  color: #202238 !important;
 }
 
 .v-btn .search-filter-clear-icon {
@@ -564,7 +577,7 @@ defineExpose({
 }
 
 .v-btn .search-filter-clear-icon:hover {
-  color: rgb(var(--v-theme-error)) !important;
+  color: #c93c37 !important;
 }
 
 .v-btn:has(.search-filter-clear-icon:hover) {
@@ -596,9 +609,9 @@ defineExpose({
 
 .inline-filter-label {
   margin-right: 72px;
-  font-size: 20px;
-  font-weight: 600;
-  color: rgb(var(--v-theme-grey800));
+  font-size: 16px;
+  font-weight: 650;
+  color: #202238;
 }
 
 .inline-filter-options {
@@ -645,7 +658,7 @@ defineExpose({
 .inline-filter-divider {
   width: 100%;
   margin: 12px 0;
-  border-top: 1px solid rgb(var(--v-theme-grey300));
+  border-top: 1px solid #dcdde5;
 }
 
 .inline-filter-option {
@@ -657,15 +670,17 @@ defineExpose({
   border-radius: 12px !important;
   font-size: 14px;
   line-height: 20px;
-  color: rgb(var(--v-theme-grey800));
-  background: rgb(var(--v-theme-surface));
-  border-color: rgb(var(--v-theme-grey300)) !important;
+  color: #202238;
+  background: #ffffff;
+  border-color: #dcdde5 !important;
+  transition: background-color 160ms ease, border-color 160ms ease, box-shadow 160ms ease;
 }
 
 .inline-filter-option-selected {
-  color: white !important;
-  background: #397f7b !important;
-  border-color: #397f7b !important;
+  color: #171633 !important;
+  background: #f2c94c !important;
+  border-color: #f2c94c !important;
+  box-shadow: 0 1px 2px rgb(36 41 47 / 16%);
 }
 
 @media only screen and (max-width: 600px) {

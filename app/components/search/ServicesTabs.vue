@@ -12,7 +12,6 @@
       <v-btn
         class="services-navigation__item"
         :class="{ 'services-navigation__item--active': activeService === service.id }"
-        :style="{ '--service-color': service.color }"
         :aria-pressed="activeService === service.id"
         aria-controls="search-service-filters"
         variant="outlined"
@@ -20,7 +19,6 @@
       >
         <span
           class="services-navigation__icon"
-          :style="{ color: activeService === service.id ? 'inherit' : service.color }"
           aria-hidden="true"
         >
           <img
@@ -60,10 +58,10 @@ const props = defineProps({
 const emit = defineEmits(['change'])
 
 const services = [
-  { id: 'paper', title: 'Past Papers', icon: 'stat-icon icon-paper', color: '#2e90fa' },
-  { id: 'study-materials', title: 'Study Materials', image: '/images/study-materials.svg', color: 'rgb(18, 183, 106)' },
-  { id: 'quizhub', title: 'Exam Hub', icon: 'stat-icon icon-exam', color: '#7c4dff' },
-  { id: 'tutorial', title: 'Tutorial', icon: 'stat-icon icon-tutorial', color: '#2e90fa' },
+  { id: 'paper', title: 'Past Papers', icon: 'stat-icon icon-paper' },
+  { id: 'study-materials', title: 'Study Materials', image: '/images/study-materials.svg' },
+  { id: 'quizhub', title: 'Exam Hub', icon: 'stat-icon icon-exam' },
+  { id: 'tutorial', title: 'Tutorial', icon: 'stat-icon icon-tutorial' },
 ]
 
 const formatCount = (serviceId) => {
@@ -77,8 +75,8 @@ const formatCount = (serviceId) => {
   width: 100%;
   max-width: 1200px;
   min-width: 0;
-  padding: 12px 0 0;
-  border-bottom: 1px solid color-mix(in srgb, var(--search-service-color, #2e90fa) 50%, rgb(var(--v-theme-surface)));
+  padding: 16px 0 0;
+  border-bottom: 1px solid #dcdde5;
   overflow-x: auto;
   scrollbar-width: none;
 }
@@ -90,36 +88,40 @@ const formatCount = (serviceId) => {
 .services-navigation__items {
   display: flex;
   width: max-content;
-  gap: 12px;
+  gap: 8px;
   margin-inline: 0;
 }
 
 .services-navigation__tab {
   position: relative;
   display: flex;
-  flex: 0 0 200px;
+  flex: 0 0 216px;
 }
 
 .services-navigation__item {
-  width: 200px;
-  height: 64px !important;
-  flex: 0 0 200px;
-  padding: 0 16px;
+  width: 216px;
+  height: 72px !important;
+  flex: 0 0 216px;
+  padding: 0 20px;
   border: 0;
-  border-radius: 8px;
-  color: rgb(var(--v-theme-grey700));
-  background: rgb(var(--v-theme-surface));
-  font-size: 14px;
+  border-radius: 12px 12px 0 0;
+  color: #202238;
+  background: #ffffff;
+  font-size: 15px;
   font-weight: 600;
   letter-spacing: normal;
   text-transform: none;
+  transition: background-color 180ms ease, color 180ms ease, box-shadow 180ms ease;
 }
 
 .services-navigation__item--active {
-  color: white;
-  background-color: var(--service-color);
-  border-bottom-left-radius: 0;
-  border-bottom-right-radius: 0;
+  color: #ffffff;
+  background-color: #171633;
+  box-shadow: inset 0 -4px 0 #f2c94c;
+}
+
+.services-navigation__item:not(.services-navigation__item--active):hover {
+  background: #fff3c4;
 }
 
 .services-navigation__item :deep(.v-btn__content) {
@@ -143,6 +145,7 @@ const formatCount = (serviceId) => {
   letter-spacing: 0;
   line-height: 1;
   text-indent: 0;
+  color: #171633;
 }
 
 .services-navigation__icon img {
@@ -187,6 +190,14 @@ const formatCount = (serviceId) => {
   filter: brightness(0) invert(1);
 }
 
+.services-navigation__item--active .services-navigation__icon {
+  color: #ffffff;
+}
+
+.services-navigation__icon img {
+  filter: brightness(0) saturate(100%) invert(12%) sepia(7%) saturate(1051%) hue-rotate(169deg) brightness(93%) contrast(90%);
+}
+
 .services-navigation__copy {
   display: flex;
   min-width: 0;
@@ -197,18 +208,21 @@ const formatCount = (serviceId) => {
 
 .services-navigation__count {
   min-height: 16px;
-  font-size: 13px;
+  color: #f2c94c;
+  font-size: 14px;
   font-weight: 700;
+  line-height: 18px;
 }
 
 .services-navigation__item:not(.services-navigation__item--active) .services-navigation__count {
-  color: rgb(var(--v-theme-grey500));
+  color: #65697a;
 }
 
 .services-navigation__title {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+  line-height: 20px;
 }
 
 @media (min-width: 960px) {

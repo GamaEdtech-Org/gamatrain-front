@@ -33,8 +33,10 @@
   height: 174px;
   max-width: 1200px;
   padding: 0;
-  border: 1px solid rgb(var(--v-theme-grey200));
-  background: #fff;
+  border: 1px solid #dcdde5;
+  border-radius: 16px !important;
+  background: #ffffff;
+  box-shadow: 0 1px 2px rgb(36 41 47 / 8%);
 }
 
 .skeleton-cover {
@@ -45,7 +47,7 @@
   max-height: 100%;
   aspect-ratio: 63 / 74;
   overflow: hidden;
-  border-radius: 23px 0 0 23px;
+  border-radius: 15px 0 0 15px;
 }
 
 .skeleton-body {

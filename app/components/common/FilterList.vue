@@ -33,7 +33,7 @@
         v-model="textSearch"
         label="Search anything...."
         variant="outlined"
-        color="primary"
+        color="#F2C94C"
         max-width="330"
         density="compact"
         hide-details
@@ -45,7 +45,7 @@
           <v-btn
             icon
             varient="text"
-            color="primary"
+            color="#F2C94C"
             width="50"
             class="rounded-ts rounded-te-xl rounded-be-xl rounded-bs h-100 ml-n2"
             flat
@@ -362,7 +362,7 @@
             Clear All
           </v-btn>
           <v-btn
-            color="primary"
+            color="#F2C94C"
             rounded="xl"
             height="40"
             width="200"
@@ -918,6 +918,20 @@ const clearAllFilter = async () => {
   min-width: 0;
 }
 
+.header-keyword-search :deep(.v-field) {
+  color: #202238;
+  background: #ffffff;
+  border-radius: 12px;
+}
+
+.header-keyword-search :deep(.v-field__outline) {
+  color: #8c959f;
+}
+
+.header-keyword-search :deep(.v-field--focused .v-field__outline) {
+  color: #f2c94c;
+}
+
 @media (min-width: 960px) {
   .header-search-teleport-source {
     display: none !important;
@@ -925,7 +939,7 @@ const clearAllFilter = async () => {
 }
 
 .filter-clear-icon:hover {
-  color: rgb(var(--v-theme-error)) !important;
+  color: #c93c37 !important;
 }
 
 :deep(.height-badge .v-badge__wrapper .v-badge__badge) {
@@ -946,14 +960,14 @@ const clearAllFilter = async () => {
   position: sticky;
   top: 0;
   z-index: 2;
-  background: rgb(var(--v-theme-surface));
+  background: #f7f7f4;
 }
 .filter-list-sticky-host {
   display: contents !important;
 }
 .desktop-filter-controls,
 .persistent-search-content {
-  background: rgb(var(--v-theme-surface));
+  background: #f7f7f4;
 }
 .desktop-filter-controls-content {
   transform-origin: top center;
@@ -982,9 +996,10 @@ const clearAllFilter = async () => {
   padding: 16px 24px 0 0;
   margin-right: auto;
   margin-top: 16px;
-  background: rgb(var(--v-theme-surface));
-  border: 1px solid rgb(var(--v-theme-grey300));
-  border-radius: 16px;
+  background: #ffffff;
+  border: 1px solid #dcdde5;
+  border-radius: 12px;
+  box-shadow: 0 1px 2px rgb(36 41 47 / 8%);
 }
 
 @media (min-width: 960px) {

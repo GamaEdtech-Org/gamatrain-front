@@ -53,14 +53,15 @@ defineProps({
   align-items: center;
   justify-content: space-between;
   gap: 24px;
-  padding: 8px 20px;
+  padding: 12px 16px;
   margin-top: 0;
-  color: #111827;
+  color: #202238;
   text-decoration: none;
-  background: #f2f9f8;
-  border: 1px solid #397f7b;
-  border-radius: 16px;
-  transition: transform 200ms ease-out, border-color 200ms ease-out;
+  background: #f7f7f4;
+  border: 1px solid #171633;
+  border-radius: 12px;
+  box-shadow: 0 1px 2px rgb(36 41 47 / 8%);
+  transition: transform 180ms ease-out, box-shadow 180ms ease-out;
 }
 
 .subject-directory-card__main {
@@ -72,25 +73,21 @@ defineProps({
 
 .subject-directory-card__icon {
   display: inline-flex;
-  width: 46px;
-  height: 46px;
-  flex: 0 0 46px;
+  width: 44px;
+  height: 44px;
+  flex: 0 0 44px;
   align-items: center;
   justify-content: center;
   color: #ffffff;
-  background: #7dbfba;
-  border-radius: 12px;
-  transition: background-color 200ms ease-out;
+  background: #171633;
+  border-radius: 10px;
 }
 
 @media (hover: hover) and (pointer: fine) {
   .subject-directory-card:hover {
-    transform: scale(1.02);
-    border-color: #2d6662;
-  }
-
-  .subject-directory-card:hover .subject-directory-card__icon {
-    background-color: #5a9f99;
+    transform: translateY(-1px);
+    border-color: #dfb536;
+    box-shadow: 0 6px 18px rgb(36 41 47 / 14%);
   }
 }
 
@@ -102,8 +99,8 @@ defineProps({
 }
 
 .subject-directory-card__icon svg {
-  width: 24px;
-  height: 24px;
+  width: 22px;
+  height: 22px;
 }
 
 .subject-directory-card__copy {
@@ -115,35 +112,40 @@ defineProps({
 
 .subject-directory-card__title {
   overflow: hidden;
-  color: #0b0b0b;
-  font-size: 20px;
+  color: #202238;
+  font-size: 18px;
   font-weight: 700;
-  line-height: 28px;
+  line-height: 24px;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
 .subject-directory-card__subtitle {
-  color: #8a94a6;
-  font-size: 17px;
+  color: #65697a;
+  font-size: 14px;
   font-weight: 400;
-  line-height: 24px;
+  line-height: 20px;
 }
 
 .subject-directory-card__action {
   display: inline-flex;
-  min-height: 36px;
+  min-height: 40px;
   flex: 0 0 auto;
   align-items: center;
   gap: 8px;
-  padding: 6px 12px;
-  color: #111111;
-  font-size: 16px;
-  font-weight: 400;
-  line-height: 22px;
-  background: #ffffff;
-  border: 1px solid #d9d9d9;
-  border-radius: 14px;
+  padding: 8px 14px;
+  color: #171633;
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 20px;
+  background: #f2c94c;
+  border: 1px solid #f2c94c;
+  border-radius: 10px;
+}
+
+.subject-directory-card:hover .subject-directory-card__action {
+  background: #dfb536;
+  border-color: #dfb536;
 }
 
 @media (max-width: 600px) {
@@ -159,7 +161,7 @@ defineProps({
   }
 
   .subject-directory-card__title {
-    font-size: 18px;
+    font-size: 16px;
     line-height: 24px;
     white-space: normal;
   }
