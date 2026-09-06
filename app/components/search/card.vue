@@ -1,227 +1,212 @@
 <template>
   <div
-    class="w-100 card-search rounded-lg px-2 py-4 d-flex flex-wrap ga-3 align-center justify-start position-relative"
+    class="card-search w-100 rounded-xl position-relative"
+    role="link"
+    tabindex="0"
+    :aria-label="information?.title"
+    @click="openCard"
+    @keydown.enter="openCard"
+    @keydown.space.prevent="openCard"
   >
-    <Nuxt-link
-      :to="createLinkCard(information)"
-      :prefetch="false"
-    >
-      <div class="w-100 h-100 ">
-        <div class="d-flex ga-3 align-stretch justify-start">
-          <div
-            class="img-div rounded-ts-lg rounded-bs-lg d-flex align-center justify-center ga-3 flex-column"
-          >
-            <!-- <NuxtImg
+    <div class="card-content d-flex align-stretch">
+      <div class="cover-wrap d-flex align-center justify-center flex-shrink-0">
+        <v-img
           v-if="information.lesson_pic"
           :alt="information?.title"
-          width="100px"
+          cover
           :src="information.lesson_pic"
-          placeholder
-          class="w-100 h-100 rounded-ts-lg rounded-bs-lg"
-        /> -->
+          class="cover-image"
+        />
+        <div
+          v-else
+          class="cover-fallback d-flex align-center justify-center flex-column text-center"
+        >
+          <span class="font-weight-bold">{{ information.lesson_title }}</span>
+          <small>Gamatrain.com</small>
+        </div>
+      </div>
+
+      <div class="card-body d-flex flex-column min-width-0">
+        <div class="card-top d-flex align-start justify-space-between ga-4">
+          <div class="publisher d-flex align-center ga-2 min-width-0">
             <v-img
-              v-if="information.lesson_pic"
-              :alt="information?.title"
-              width="100px"
+              :src="information.avatar || '/images/default-user.svg'"
+              :alt="publisherName"
+              width="34"
+              height="34"
               cover
-              :src="information.lesson_pic"
-              class="w-100 h-100 rounded-ts-lg rounded-bs-lg"
+              class="publisher-avatar rounded-circle flex-shrink-0"
             />
-            <template v-else>
-              <p class="text-subtitle-1 font-weight-bold text-center">
-                {{ information.lesson_title }}
-              </p>
-              <a
-                class="text-subtitle-2"
-                href="https://gamatrain.com text-center"
-              >Gamatrain.com</a>
-            </template>
+            <span class="publisher-name text-truncate">{{ publisherName }}</span>
           </div>
+
           <div
-            class="content-card d-flex flex-column ga-2 align-start justify-center justify-sm-space-between"
+            class="card-indicators d-none d-md-flex align-center flex-shrink-0"
+            aria-label="Resource information"
           >
-            <h2
-              class="text-h5 text-sm-h4 text-black font-weight-medium"
+            <DifficultyIndicator :level="information.level" :size="28" />
+            <span class="indicator indicator-library" title="Resource available">
+              <img :src="libraryCheckIcon" alt="" class="status-icon">
+            </span>
+            <span
+              class="indicator indicator-pdf"
+              :class="{ 'indicator-muted': !information.q_file }"
+              title="PDF availability"
             >
-              {{ information?.title }}
-            </h2>
-            <div class="d-flex align-center justify-start flex-wrap ga-3">
-              <v-chip
-                v-show="information.section_title"
-                :prefetch="false"
-                variant="flat"
-                class="text-subtitle-1 text-sm-h5 pl-3 pr-3"
-                color="grey100"
-                :to="`/search?type=${
-                  route.query.type ? route.query.type : `paper`
-                }&section=${information.section}`"
-              >
-                <span class="text-grey500">{{ information?.section_title }}</span>
-              </v-chip>
-              <v-chip
-                v-show="information.base_title"
-                :prefetch="false"
-                variant="flat"
-                class="text-subtitle-1 text-sm-h5 pl-3 pr-3"
-                color="grey100"
-                :to="`/search?type=${
-                  route.query.type ? route.query.type : `paper`
-                }&section=${information.section}&base=${information.base}`"
-              >
-                <span class="text-grey500">{{ information?.base_title }}</span>
-              </v-chip>
-              <v-chip
-                v-show="information.lesson_title"
-                :prefetch="false"
-                variant="flat"
-                class="text-subtitle-1 text-sm-h5 pl-5 pr-5"
-                color="grey100"
-                :to="`/search?type=${
-                  route.query.type ? route.query.type : `paper`
-                }&section=${information.section}&base=${information.base}&lesson=${
-                  information.lesson
-                }`"
-              >
-                <span class="text-grey500">{{ information.lesson_title }}</span>
-              </v-chip>
-            </div>
-            <div
-              class="d-none d-sm-flex align-center justify-space-between container-extra-info"
+              <img :src="pdfCardIcon" alt="" class="status-icon">
+            </span>
+            <span
+              class="indicator indicator-word"
+              :class="{ 'indicator-muted': !information.q_file_word }"
+              title="Word file availability"
             >
-              <span
-                v-if="information.ext && route.query.type == `learnfiles`"
-                class="text-grey500 text-subtitle-1 d-flex align-start ga-1"
-              >
-                <v-icon color="grey300">md:sticky_note_outlined</v-icon>
-                {{ information.ext }}
-              </span>
-              <span
-                v-if="information.test_type_title"
-                class="text-grey500 text-subtitle-1 d-flex align-start ga-1"
-              >
-                <v-icon color="grey300">md:folder_outlined</v-icon>
-                {{ information.test_type_title }}
-              </span>
-              <span
-                v-if="information.tests_num && route.query.type == `azmoon`"
-                class="text-grey500 text-subtitle-1 d-flex align-start ga-1"
-              >
-                <v-icon color="grey300">md:list</v-icon>
-                {{ information.tests_num }}
-              </span>
-
-              <span
-                v-if="information.views"
-                class="text-grey500 text-subtitle-1 d-flex align-start ga-1"
-              >
-                <v-icon color="grey300">md:visibility_outlined</v-icon>
-                {{ information.views }}
-              </span>
-
-              <span
-                v-if="information.reply_num && route.query.type == `question`"
-                class="text-grey500 text-subtitle-1 d-flex align-start ga-1"
-              >
-                <v-icon color="grey300">md:reply</v-icon>
-                {{ information.reply_num }}
-              </span>
-
-              <span
-                class="text-grey500 text-subtitle-1 d-flex align-start ga-1"
-              >
-                <v-icon color="grey300">md:calendar_month_outlined</v-icon>
-                {{ new Date(information.subdate).toLocaleDateString() }}
-              </span>
-
-              <div class="d-flex align-center ga-1">
-                <v-icon
-                  v-if="information.q_file"
-                  color="lightError"
-                  :to="`/paper/${information.id}/${information.title_url}`"
-                >
-                  md:picture_as_pdf
-                </v-icon>
-                <v-icon
-                  v-if="information.q_file_word"
-                  color="info"
-                >
-                  md:text_snippet
-                </v-icon>
-              </div>
-            </div>
+              <img :src="wordCardIcon" alt="" class="status-icon">
+            </span>
+            <span class="indicator indicator-fire" title="Featured resource">
+              <img :src="fireCardIcon" alt="" class="status-icon">
+            </span>
+            <QualityIndicator :score="qualityScore" :size="28" />
           </div>
         </div>
-        <div class="d-flex d-sm-none align-center justify-space-between w-100 mt-2">
-          <span
-            v-if="information.ext && route.query.type == `learnfiles`"
-            class="text-grey500 text-subtitle-1 d-flex align-start ga-1"
+
+        <h2 class="card-title text-black font-weight-medium text-truncate">
+          {{ information?.title }}
+        </h2>
+        <p
+          v-if="description"
+          class="card-description text-grey500 text-truncate"
+        >
+          {{ description }}
+        </p>
+
+        <div class="subject-tags d-flex align-center justify-start flex-wrap ga-2">
+          <v-chip
+            v-show="information.section_title"
+            :prefetch="false"
+            variant="flat"
+            class="tag-chip"
+            color="grey100"
+            :to="`/search?type=${route.query.type || 'paper'}&section=${information.section}`"
           >
-            <v-icon color="grey300">md:sticky_note_outlined</v-icon>
+            <span class="text-grey500">{{ information?.section_title }}</span>
+          </v-chip>
+          <v-chip
+            v-show="information.base_title"
+            :prefetch="false"
+            variant="flat"
+            class="tag-chip"
+            color="grey100"
+            :to="`/search?type=${route.query.type || 'paper'}&section=${information.section}&base=${information.base}`"
+          >
+            <span class="text-grey500">{{ information?.base_title }}</span>
+          </v-chip>
+          <v-chip
+            v-show="information.lesson_title"
+            :prefetch="false"
+            variant="flat"
+            class="tag-chip"
+            color="grey100"
+            :to="`/search?type=${route.query.type || 'paper'}&section=${information.section}&base=${information.base}&lesson=${information.lesson}`"
+          >
+            <span class="text-grey500">{{ information.lesson_title }}</span>
+          </v-chip>
+        </div>
+
+        <div class="metadata d-flex align-center flex-wrap ga-4 mt-auto text-grey500">
+          <span
+            v-if="information.ext && route.query.type == 'learnfiles'"
+            class="metadata-item"
+          >
+            <v-icon size="18" color="grey300">md:sticky_note_outlined</v-icon>
             {{ information.ext }}
           </span>
-          <span
-            v-if="information.test_type_title"
-            class="text-grey500 text-subtitle-1 d-flex align-start ga-1"
-          >
-            <v-icon color="grey300">md:folder_outlined</v-icon>
+          <span v-if="information.test_type_title" class="metadata-item">
+            <v-icon size="18" color="grey300">md:folder_outlined</v-icon>
             {{ information.test_type_title }}
           </span>
-
           <span
-            v-if="information.tests_num && route.query.type == `azmoon`"
-            class="text-grey500 text-subtitle-1 d-flex align-start ga-1"
+            v-if="information.tests_num && route.query.type == 'azmoon'"
+            class="metadata-item"
           >
-            <v-icon color="grey300">md:list</v-icon>
+            <v-icon size="18" color="grey300">md:list</v-icon>
             {{ information.tests_num }}
           </span>
-          <span
-            v-if="information.views"
-            class="text-grey500 text-subtitle-1 d-flex align-start ga-1"
-          >
-            <v-icon color="grey300">md:visibility_outlined</v-icon>
+          <span v-if="information.views" class="metadata-item">
+            <v-icon size="18" color="grey300">md:visibility_outlined</v-icon>
             {{ information.views }}
           </span>
           <span
-            v-if="information.reply_num && route.query.type == `question`"
-            class="text-grey500 text-subtitle-1 d-flex align-start ga-1"
+            v-if="information.reply_num && route.query.type == 'question'"
+            class="metadata-item"
           >
-            <v-icon color="grey300">md:reply</v-icon>
+            <v-icon size="18" color="grey300">md:reply</v-icon>
             {{ information.reply_num }}
           </span>
-          <span class="text-grey500 text-subtitle-1 d-flex align-start ga-1">
-            <v-icon color="grey300">md:calendar_month_outlined</v-icon>
-            {{ new Date(information.subdate).toLocaleDateString() }}
+          <span class="metadata-item">
+            <v-icon size="18" color="grey300">md:calendar_month_outlined</v-icon>
+            {{ formattedDate }}
           </span>
+        </div>
 
-          <div class="d-flex align-center ga-1">
-            <v-icon
-              v-show="information.q_file"
-              color="lightError"
-            >
-              md:picture_as_pdf
-            </v-icon>
-            <v-icon
-              v-show="information.q_file_word"
-              color="info"
-            >
-              md:text_snippet
-            </v-icon>
-          </div>
+        <div class="card-indicators mobile-indicators d-flex d-md-none align-center">
+          <DifficultyIndicator :level="information.level" :size="24" />
+          <span class="indicator indicator-library"><img :src="libraryCheckIcon" alt="" class="status-icon"></span>
+          <span class="indicator indicator-pdf" :class="{ 'indicator-muted': !information.q_file }"><img :src="pdfCardIcon" alt="" class="status-icon"></span>
+          <span class="indicator indicator-word" :class="{ 'indicator-muted': !information.q_file_word }"><img :src="wordCardIcon" alt="" class="status-icon"></span>
+          <span class="indicator indicator-fire"><img :src="fireCardIcon" alt="" class="status-icon"></span>
+          <QualityIndicator :score="qualityScore" :size="24" />
         </div>
       </div>
-    </Nuxt-link>
+    </div>
   </div>
 </template>
 
 <script setup>
-import { useRoute } from 'vue-router'
+import { computed } from 'vue'
+import { useRoute, useRouter } from 'vue-router'
+import DifficultyIndicator from './DifficultyIndicator.vue'
+import QualityIndicator from './QualityIndicator.vue'
+import fireCardIcon from '~/assets/images/search-card/fire.svg'
+import libraryCheckIcon from '~/assets/images/search-card/library-check.svg'
+import pdfCardIcon from '~/assets/images/search-card/pdf.svg'
+import wordCardIcon from '~/assets/images/search-card/word.svg'
 
 const route = useRoute()
+const router = useRouter()
 
-defineProps({
+const props = defineProps({
   information: {
     type: Object,
+    default: () => ({}),
   },
+})
+
+const publisherName = computed(() => {
+  const name = [props.information.first_name, props.information.last_name]
+    .filter(Boolean)
+    .join(' ')
+    .trim()
+  return name || props.information.username || 'GamaTrain'
+})
+
+const description = computed(() => String(props.information.description || props.information.summary || '')
+  .replace(/<[^>]*>/g, ' ')
+  .replace(/&amp;/gi, '&')
+  .replace(/&nbsp;/gi, ' ')
+  .replace(/&#39;/gi, "'")
+  .replace(/&quot;/gi, '"')
+  .replace(/\s+/g, ' ')
+  .trim())
+
+const qualityScore = computed(() => {
+  const score = Number(props.information.referee_score ?? props.information.ref_score ?? 0)
+  return Number.isFinite(score) ? Math.min(5, Math.max(0, Math.round(score))) : 0
+})
+
+const formattedDate = computed(() => {
+  if (!props.information.subdate) return ''
+  const date = new Date(props.information.subdate)
+  return Number.isNaN(date.getTime()) ? props.information.subdate : date.toLocaleDateString()
 })
 
 const getEquivalentOldType = (type) => {
@@ -263,7 +248,6 @@ const createLinkCard = (information) => {
     case 'dars':
       idType = 'tutorial'
       break
-
     case 'azmoon':
       idType = 'exam'
       break
@@ -276,21 +260,192 @@ const createLinkCard = (information) => {
   }
   return `/${idType}/${information.id}/${information.title_url}`
 }
+
+const openCard = (event) => {
+  const interactiveElement = event.target instanceof Element
+    ? event.target.closest('a, button, input, select, textarea, [role="button"]')
+    : null
+
+  if (interactiveElement && interactiveElement !== event.currentTarget) return
+  router.push(createLinkCard(props.information))
+}
 </script>
 
 <style scoped>
 .card-search {
-  border: 1px solid rgb(var(--v-theme-grey200));
-  min-height: 120px;
+  overflow: hidden;
+  height: 174px;
   max-width: 1200px;
+  border: 1px solid rgb(var(--v-theme-grey200));
+  background: #fff;
+  transition: border-color 180ms ease, box-shadow 180ms ease, transform 180ms ease;
 }
-.img-div {
-  min-width: 100px;
-  max-width: 100px;
-  height: 120px;
-  background-color: #f9f3f3;
+
+.card-search:hover {
+  border-color: #7dbfba;
+  box-shadow: 0 8px 24px rgb(57 127 123 / 10%);
+  transform: translateY(-1px);
 }
-.container-extra-info {
-  width: 400px;
+
+.card-content {
+  height: 100%;
+  min-height: 0;
+  padding: 12px;
+  color: inherit;
+}
+
+.cover-wrap {
+  width: 126px;
+  min-width: 126px;
+  height: 148px;
+  min-height: 148px;
+  max-height: 148px;
+  overflow: hidden;
+  border-radius: 10px;
+  background: #f9f3f3;
+}
+
+.cover-image,
+.cover-fallback {
+  width: 100%;
+  height: 100%;
+}
+
+.cover-fallback {
+  padding: 12px;
+  color: rgb(var(--v-theme-grey600));
+}
+
+.card-body {
+  flex: 1;
+  padding: 2px 8px 2px 16px;
+}
+
+.min-width-0 { min-width: 0; }
+
+.publisher-avatar { border: 1px solid rgb(var(--v-theme-grey100)); }
+
+.publisher-name {
+  max-width: 260px;
+  color: rgb(var(--v-theme-grey700));
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.card-title {
+  max-width: 100%;
+  margin-top: 6px;
+  font-size: 18px;
+  line-height: 26px;
+}
+
+.card-description {
+  max-width: 100%;
+  margin-top: 1px;
+  font-size: 13px;
+  line-height: 20px;
+}
+
+.subject-tags { margin-top: 6px; }
+
+.tag-chip {
+  z-index: 2;
+  height: 25px;
+  padding-inline: 10px !important;
+  font-size: 12px;
+}
+
+.metadata {
+  min-height: 22px;
+  padding-top: 8px;
+  font-size: 12px;
+}
+
+.metadata-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.card-indicators { gap: 18px; }
+
+.indicator {
+  display: inline-flex;
+  width: 28px;
+  height: 28px;
+  align-items: center;
+  justify-content: center;
+}
+
+.status-icon {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.indicator-muted { opacity: 0.32; }
+
+.mobile-indicators {
+  gap: 12px;
+  margin-top: 10px;
+}
+
+@media (max-width: 959px) {
+  .card-search { height: 156px; }
+
+  .cover-wrap {
+    width: 112px;
+    min-width: 112px;
+    height: 130px;
+    min-height: 130px;
+    max-height: 130px;
+  }
+}
+
+@media (max-width: 599px) {
+  .card-search { height: 134px; }
+
+  .card-content { padding: 10px; }
+
+  .cover-wrap {
+    width: 88px;
+    min-width: 88px;
+    height: 112px;
+    min-height: 112px;
+    max-height: 112px;
+  }
+
+  .card-body { padding: 0 0 0 10px; }
+
+  .publisher-avatar {
+    width: 28px !important;
+    height: 28px !important;
+  }
+
+  .publisher-name {
+    max-width: 150px;
+    font-size: 12px;
+  }
+
+  .card-title {
+    margin-top: 4px;
+    font-size: 15px;
+    line-height: 22px;
+  }
+
+  .card-description {
+    font-size: 12px;
+    line-height: 18px;
+  }
+
+  .subject-tags {
+    flex-wrap: nowrap !important;
+    overflow: hidden;
+  }
+
+  .metadata {
+    gap: 8px !important;
+    padding-top: 6px;
+  }
 }
 </style>
