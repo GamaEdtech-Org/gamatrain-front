@@ -28,7 +28,7 @@
         <lazy-home-blog-container v-if="showBlogSlider" />
       <!-- End blog container -->
       </main>
-      <lazy-common-footer />
+      <lazy-common-footer v-if="route.path !== '/search'" />
       <menu-bottom-nav-menu v-if="showBottomNavSlider" />
       <AppGlobalSnackbar />
       <!-- <client-only>

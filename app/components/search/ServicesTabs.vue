@@ -75,7 +75,7 @@ const formatCount = (serviceId) => {
   width: 100%;
   max-width: 1200px;
   min-width: 0;
-  padding: 16px 0 0;
+  padding: 0;
   border-bottom: 1px solid #dcdde5;
   overflow-x: auto;
   scrollbar-width: none;

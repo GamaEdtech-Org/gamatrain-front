@@ -12,6 +12,7 @@
           has-keyword-search
           keyword-search-in-header
           desktop-sticky-filters
+          desktop-sidebar-layout
           @change-filter="changeFilter"
         >
           <template #services-navigation="{ selectService }">
@@ -48,41 +49,40 @@
               </div>
             </div>
           </template>
+          <search-list
+            v-if="data && data.length > 0"
+            :data-list="data"
+            :is-initial-loading="isInitialDataLoading"
+            :is-pagination-loading="isPaginationDataLoading"
+            :is-all-data-loaded="isAllDataLoaded"
+            :is-previous-loading="isPreviousLoading"
+            :first-loaded-page-number="firstLoadedPageNumber"
+            :is-profile-mode="route.query.type == 'teacher'"
+            @load-next-page="loadNextPageData"
+            @load-previous-page="loadPreviousPageData"
+          />
+
+          <div
+            v-else
+            class="search-empty-state w-100 d-flex flex-column align-center justify-center ga-4"
+          >
+            <span class="text-h4 font-weight-bold">Be the first to add content to this category.</span>
+            <v-btn
+              class="text-h5 font-weight-bold"
+              width="250"
+              color="#F2C94C"
+              rounded="pill"
+              flat
+              variant="tonal"
+              @click="createLinkAddConent()"
+            >
+              <v-icon color="#171633">
+                md:add
+              </v-icon>
+              Add
+            </v-btn>
+          </div>
         </CommonFilterList>
-      </div>
-
-      <search-list
-        v-if="data && data.length > 0"
-        :data-list="data"
-        :is-initial-loading="isInitialDataLoading"
-        :is-pagination-loading="isPaginationDataLoading"
-        :is-all-data-loaded="isAllDataLoaded"
-        :is-previous-loading="isPreviousLoading"
-        :first-loaded-page-number="firstLoadedPageNumber"
-        :is-profile-mode="route.query.type == 'teacher'"
-        @load-next-page="loadNextPageData"
-        @load-previous-page="loadPreviousPageData"
-      />
-
-      <div
-        v-else
-        class="w-100 d-flex flex-column align-center justify-center ga-4 mt-16"
-      >
-        <span class="text-h4 font-weight-bold">Be the first to add content to this category.</span>
-        <v-btn
-          class="text-h5 font-weight-bold"
-          width="250"
-          color="#F2C94C"
-          rounded="pill"
-          flat
-          variant="tonal"
-          @click="createLinkAddConent()"
-        >
-          <v-icon color="#171633">
-            md:add
-          </v-icon>
-          Add
-        </v-btn>
       </div>
     </v-row>
   </v-container>
@@ -666,7 +666,7 @@ const filters = computed(() => {
       },
     }),
     variant: () => makeFilter({
-      title: 'Variants',
+      title: 'Variant',
       staticList: [
         { id: '7814', title: '1' },
         { id: '7815', title: '2' },
@@ -977,6 +977,10 @@ onMounted(() => {
   background: #f7f7f4;
 }
 
+.search-empty-state {
+  min-height: 280px;
+}
+
 :deep(.inline-filter-group) {
   border: 1px solid #dcdde5;
   margin-top: 12px;
@@ -1053,6 +1057,7 @@ onMounted(() => {
 }
 .search-results-title {
   min-width: 0;
+  padding-bottom: 6px;
   margin: 0;
   color: #202238;
   font-size: 22px;
@@ -1071,6 +1076,31 @@ onMounted(() => {
   font-size: 14px;
   font-weight: 500;
   line-height: 20px;
+}
+
+@media (min-width: 960px) {
+  .margin-top-handle {
+    width: 100%;
+    max-width: none !important;
+    height: calc(100dvh - 64px);
+    min-height: 0;
+    padding: 16px 24px;
+    overflow: hidden;
+  }
+
+  .margin-top-handle > .v-row {
+    height: 100%;
+    margin: 0;
+    align-content: stretch;
+  }
+
+  .top-info-div {
+    height: 100%;
+  }
+
+  .search-results-heading {
+    padding: 6px 0;
+  }
 }
 
 </style>

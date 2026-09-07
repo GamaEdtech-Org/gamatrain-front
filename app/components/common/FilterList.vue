@@ -1,12 +1,21 @@
 <template>
   <div
     class="w-100 d-flex justify-center flex-wrap"
-    :class="{ 'filter-list-sticky-host': stickyContent }"
+    :class="{
+      'filter-list-sticky-host': stickyContent,
+      'filter-list-sidebar-layout': desktopSidebarLayout,
+    }"
   >
-    <slot
-      name="services-navigation"
-      :select-service="selectService"
-    />
+    <div
+      v-if="desktopSidebarLayout"
+      class="search-workspace-heading d-none d-md-flex"
+    >
+      <slot
+        name="results-heading"
+        :count="countDataFound"
+        :loading="loading"
+      />
+    </div>
     <v-col
       :cols="hasKeywordSearch ? `4` : `12`"
       md="12"
@@ -63,8 +72,12 @@
 
     <div
       class="w-100 d-flex justify-center flex-wrap"
-      :class="{ 'filter-list-sticky-content': stickyContent }"
+      :class="{ 'filter-list-sticky-content': stickyContent || desktopSidebarLayout }"
     >
+      <slot
+        name="services-navigation"
+        :select-service="selectService"
+      />
       <div
         ref="filterControlsShell"
         class="desktop-filter-controls-shell w-100 d-flex justify-center"
@@ -83,6 +96,22 @@
             ? { height: stickyFiltersExpanded ? `${filterControlsHeight}px` : '0px' }
             : undefined"
         >
+          <div
+            v-if="desktopSidebarLayout"
+            class="desktop-filter-sidebar-header d-none d-md-flex align-center justify-space-between"
+          >
+            <span class="desktop-filter-sidebar-title d-flex align-center ga-2">
+              <v-icon size="18">md:filter_list</v-icon>
+              Filters
+            </span>
+            <v-btn
+              variant="text"
+              class="desktop-filter-clear"
+              @click="clearAllFilter"
+            >
+              Clear
+            </v-btn>
+          </div>
           <div
             ref="filterControlsContent"
             class="desktop-filter-controls-content w-100 d-flex justify-center flex-wrap"
@@ -200,6 +229,7 @@
       </div>
 
       <div
+        v-if="!desktopSidebarLayout"
         ref="persistentContentShell"
         class="persistent-search-content-shell w-100 d-flex justify-center"
         :style="stickyMode ? { height: `${persistentContentHeight}px` } : undefined"
@@ -250,6 +280,25 @@
             </slot>
           </v-col>
         </div>
+      </div>
+
+      <div class="search-results-scroll-region">
+        <template v-if="desktopSidebarLayout">
+          <slot name="after-inline-filters" />
+
+          <v-col
+            cols="12"
+            class="d-flex d-md-none align-end justify-end ga-2 py-0 px-2 max-width-container"
+          >
+            <slot
+              name="results-heading"
+              :count="countDataFound"
+              :loading="loading"
+            />
+          </v-col>
+        </template>
+
+        <slot />
       </div>
 
       <v-dialog
@@ -375,7 +424,6 @@
         </div>
       </div>
       </v-dialog>
-      <slot />
     </div>
   </div>
 </template>
@@ -418,6 +466,10 @@ const props = defineProps({
     default: false,
   },
   desktopStickyFilters: {
+    type: Boolean,
+    default: false,
+  },
+  desktopSidebarLayout: {
     type: Boolean,
     default: false,
   },
@@ -769,7 +821,7 @@ const handleDesktopBreakpointChange = (event) => {
 }
 
 const setupDesktopStickyBehavior = () => {
-  if (!props.desktopStickyFilters || !import.meta.client) return
+  if (!props.desktopStickyFilters || props.desktopSidebarLayout || !import.meta.client) return
 
   desktopMediaQuery = window.matchMedia('(min-width: 960px)')
   desktopMediaQuery.addEventListener('change', handleDesktopBreakpointChange)
@@ -900,8 +952,7 @@ const clearAllFilter = async () => {
   for (let i = 0; i < filters.value.length; i++) {
     const filter = filters.value[i]
     if (
-      !filter.dependencies?.length
-      && filter.selectedItem
+      filter.selectedItem
       && !filter.defaultValue
     ) {
       filter.selectedItem = null
@@ -1002,6 +1053,33 @@ const clearAllFilter = async () => {
   box-shadow: 0 1px 2px rgb(36 41 47 / 8%);
 }
 
+.search-results-scroll-region {
+  display: contents;
+}
+
+.desktop-filter-sidebar-header {
+  padding: 16px;
+  border-bottom: 1px solid #dcdde5;
+}
+
+.desktop-filter-sidebar-title {
+  color: #202238;
+  font-size: 16px;
+  font-weight: 700;
+  line-height: 24px;
+}
+
+.desktop-filter-clear {
+  min-width: 0;
+  height: 32px !important;
+  padding: 0 8px !important;
+  color: #c93c37;
+  font-size: 12px;
+  font-weight: 650;
+  letter-spacing: 0;
+  text-transform: none;
+}
+
 @media (min-width: 960px) {
   .desktop-filter-controls-fixed,
   .persistent-search-content-fixed {
@@ -1046,6 +1124,251 @@ const clearAllFilter = async () => {
     padding: 8px 0;
     opacity: 1;
     transform: scale(1);
+  }
+}
+
+@media (min-width: 960px) {
+  .filter-list-sidebar-layout {
+    box-sizing: border-box;
+    display: grid !important;
+    width: 100%;
+    max-width: 1232px;
+    height: 100%;
+    min-height: 0;
+    grid-template-rows: 48px minmax(0, 1fr);
+    align-content: stretch;
+    margin: 0 auto;
+    overflow: hidden;
+    background: #f7f7f4;
+  }
+
+  .search-workspace-heading {
+    width: 100%;
+    min-width: 0;
+    min-height: 48px;
+    align-items: center;
+    padding: 0 4px;
+    background: transparent;
+  }
+
+  .filter-list-sidebar-layout > .filter-list-sticky-content {
+    display: grid !important;
+    position: relative;
+    top: auto;
+    min-width: 0;
+    min-height: 0;
+    grid-template-columns: 240px minmax(0, 980px);
+    grid-template-rows: auto minmax(0, 1fr);
+    column-gap: 12px;
+    row-gap: 0;
+    align-items: stretch;
+    justify-content: stretch !important;
+    overflow: hidden;
+    background: #f7f7f4;
+  }
+
+  .filter-list-sidebar-layout :deep(.services-navigation) {
+    grid-column: 2;
+    grid-row: 1;
+    max-width: none;
+  }
+
+  .filter-list-sidebar-layout :deep(.services-navigation__items) {
+    width: 100%;
+    max-width: none;
+  }
+
+  .filter-list-sidebar-layout .desktop-filter-controls-shell {
+    grid-column: 1;
+    grid-row: 1 / span 2;
+    min-width: 0;
+    min-height: 0;
+    align-items: stretch;
+    align-self: start;
+    overflow: hidden;
+    background: #ffffff;
+    border: 1px solid #dcdde5;
+    border-radius: 12px;
+    box-shadow: 0 1px 2px rgb(36 41 47 / 8%);
+  }
+
+  .filter-list-sidebar-layout .desktop-filter-controls {
+    min-width: 0;
+    background: #ffffff;
+  }
+
+  .filter-list-sidebar-layout .desktop-filter-controls-content {
+    display: block !important;
+    min-width: 0;
+    padding-bottom: 0;
+    background: #ffffff;
+  }
+
+  .filter-list-sidebar-layout :deep(.services-filter-container) {
+    display: block;
+    max-width: none;
+    padding: 0;
+    background: #ffffff;
+  }
+
+  .filter-list-sidebar-layout :deep(.services-filter-container > div:first-child) {
+    display: block !important;
+    margin-top: 0 !important;
+  }
+
+  .filter-list-sidebar-layout :deep(.services-filter-container .max-width-container) {
+    display: flex !important;
+    max-width: none;
+    flex-direction: column;
+    flex-wrap: nowrap !important;
+    gap: 0 !important;
+  }
+
+  .filter-list-sidebar-layout :deep(.search-filter-control) {
+    width: 100%;
+    min-width: 0;
+    height: 56px !important;
+    justify-content: stretch !important;
+    padding-inline: 16px;
+    direction: ltr;
+    text-align: left;
+    background: transparent;
+    border: 0 !important;
+    border-bottom: 1px solid #eef1f5 !important;
+    border-radius: 0 !important;
+    box-shadow: none;
+  }
+
+  .filter-list-sidebar-layout :deep(.search-filter-control:not(.search-filter-has-icon)) {
+    padding-left: 52px;
+  }
+
+  .filter-list-sidebar-layout :deep(.search-filter-control .v-btn__content) {
+    justify-content: flex-start !important;
+  }
+
+  .filter-list-sidebar-layout :deep(.search-filter-copy) {
+    align-items: flex-start;
+    text-align: left;
+  }
+
+  .filter-list-sidebar-layout :deep(.search-filter-control:hover) {
+    background: #fff3c4;
+  }
+
+  .filter-list-sidebar-layout :deep(.search-filter-control.open-style-btn),
+  .filter-list-sidebar-layout :deep(.search-filter-control.dependent-selected-btn) {
+    background: #fff3c4;
+    border-bottom-color: #f2c94c !important;
+  }
+
+  .filter-list-sidebar-layout :deep(.search-filter-value) {
+    max-width: 170px;
+  }
+
+  .filter-list-sidebar-layout .inline-filter-group-wrapper {
+    display: block;
+    max-width: none;
+    border-top: 1px solid #dcdde5;
+  }
+
+  .filter-list-sidebar-layout :deep(.inline-filter-group) {
+    display: flex;
+    width: 100%;
+    max-width: none;
+    flex-direction: column !important;
+    gap: 0 !important;
+    padding: 0 16px !important;
+    margin: 0 !important;
+    background: #ffffff;
+    border: 0 !important;
+    border-radius: 0 !important;
+    box-shadow: none;
+  }
+
+  .filter-list-sidebar-layout :deep(.inline-filter-group > .inline-filter-grouped-row) {
+    width: 100%;
+    max-width: 100%;
+    min-height: 0;
+    padding: 12px 0;
+  }
+
+  .filter-list-sidebar-layout :deep(.inline-filter-group > .inline-filter-grouped-row + .inline-filter-grouped-row) {
+    padding-top: 12px;
+    padding-left: 0;
+    margin-top: 0;
+    border-top: 1px solid #eef1f5;
+    border-left: 0;
+  }
+
+  .filter-list-sidebar-layout :deep(.inline-filter-grouped-row .inline-filter-row-content) {
+    display: block;
+    height: auto;
+  }
+
+  .filter-list-sidebar-layout :deep(.inline-filter-label) {
+    display: block;
+    margin: 0 0 8px 36px;
+    color: #202238;
+    font-size: 16px;
+    font-weight: 600;
+    line-height: 24px;
+  }
+
+  .filter-list-sidebar-layout :deep(.inline-filter-options) {
+    display: grid;
+    width: calc(100% - 36px);
+    grid-template-columns: max-content repeat(3, max-content);
+    gap: 6px;
+    align-items: center;
+    justify-content: start;
+    margin-left: 36px;
+  }
+
+  .filter-list-sidebar-layout :deep(.inline-filter-option) {
+    min-height: 28px;
+    padding: 3px 8px !important;
+    border-radius: 8px !important;
+    font-size: 12px;
+    line-height: 18px;
+  }
+
+  .filter-list-sidebar-layout .search-results-scroll-region {
+    display: block;
+    grid-column: 2;
+    grid-row: 2;
+    min-width: 0;
+    min-height: 0;
+    padding: 12px;
+    overflow-x: hidden;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    scrollbar-gutter: stable;
+    background: transparent;
+    border: 1px solid #dcdde5;
+    border-radius: 12px;
+    box-shadow: 0 1px 2px rgb(36 41 47 / 8%);
+  }
+
+  .filter-list-sidebar-layout :deep(.subject-directory-container) {
+    max-width: none;
+    padding-top: 0;
+    padding-bottom: 12px;
+  }
+
+  .filter-list-sidebar-layout :deep(.search-results-list) {
+    gap: 12px !important;
+    margin-top: 0 !important;
+  }
+}
+
+@media (max-width: 959px) {
+  .filter-list-sidebar-layout > .filter-list-sticky-content {
+    display: contents !important;
+  }
+
+  .filter-list-sidebar-layout :deep(.services-navigation) {
+    order: -1;
   }
 }
 </style>

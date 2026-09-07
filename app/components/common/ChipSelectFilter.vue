@@ -21,17 +21,24 @@
         variant="outlined"
         class="inline-filter-option"
         :class="{ 'inline-filter-option-selected': !selectedItem }"
+        :style="inlineGrouped ? { gridColumn: 1, gridRow: 1 } : undefined"
         :disabled="disabled"
         @click="onFilterUpdate(null)"
       >
         All
       </v-btn>
         <v-btn
-          v-for="item in items"
+          v-for="(item, itemIndex) in items"
           :key="item.id"
           variant="outlined"
           class="inline-filter-option"
           :class="{ 'inline-filter-option-selected': selectedItem?.id == item.id }"
+          :style="inlineGrouped
+            ? {
+              gridColumn: (itemIndex % 3) + (inlineAllowClear ? 2 : 1),
+              gridRow: Math.floor(itemIndex / 3) + 1,
+            }
+            : undefined"
           :disabled="disabled"
           @click="onFilterUpdate(item)"
         >
@@ -52,6 +59,7 @@
       { 'dependent-selected-btn': selectedItem && selectedVariant === 'dependent-green' },
       { 'search-filter-empty': !selectedItem },
       { 'search-filter-control': boxed },
+      { 'search-filter-has-icon': showItemIcon || controlIcon || controlIconSrc || controlIconSvg },
     ]"
     variant="outlined"
     :rounded="boxed ? 'lg' : 'xl'"

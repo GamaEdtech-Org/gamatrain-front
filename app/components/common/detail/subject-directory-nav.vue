@@ -57,7 +57,7 @@ defineProps({
   margin-top: 0;
   color: #202238;
   text-decoration: none;
-  background: #f7f7f4;
+  background: #ffffff;
   border: 1px solid #171633;
   border-radius: 12px;
   box-shadow: 0 1px 2px rgb(36 41 47 / 8%);
