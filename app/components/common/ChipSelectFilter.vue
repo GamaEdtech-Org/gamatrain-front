@@ -9,7 +9,12 @@
   >
     <div class="inline-filter-row-content">
       <span class="inline-filter-label">{{ title }}</span>
-      <div class="inline-filter-options">
+      <div
+        class="inline-filter-options"
+        :style="inlineGrouped
+          ? { gridTemplateColumns: `max-content repeat(${inlineItemsPerRow}, max-content)` }
+          : undefined"
+      >
         <span
           v-for="slot in inlineLeadingOptionSlots"
           :key="`inline-option-spacer-${slot}`"
@@ -35,8 +40,8 @@
           :class="{ 'inline-filter-option-selected': selectedItem?.id == item.id }"
           :style="inlineGrouped
             ? {
-              gridColumn: (itemIndex % 3) + (inlineAllowClear ? 2 : 1),
-              gridRow: Math.floor(itemIndex / 3) + 1,
+              gridColumn: (itemIndex % inlineItemsPerRow) + (inlineAllowClear ? 2 : 1),
+              gridRow: Math.floor(itemIndex / inlineItemsPerRow) + 1,
             }
             : undefined"
           :disabled="disabled"
@@ -321,6 +326,10 @@ const props = defineProps({
     type: Boolean,
     default: false,
   },
+  inlineItemsPerRow: {
+    type: Number,
+    default: 3,
+  },
   inlineDividerAfter: {
     type: Boolean,
     default: false,
@@ -444,20 +453,20 @@ defineExpose({
   height: 52px !important;
   justify-content: space-between;
   padding-inline: 16px;
-  color: #202238;
-  background: #ffffff;
-  border-color: #dcdde5 !important;
+  color: #1e2a44;
+  background: #fcfcfd;
+  border-color: #d8dee8 !important;
   border-radius: 12px !important;
   transition: background-color 160ms ease, border-color 160ms ease, box-shadow 160ms ease;
 }
 
 .search-filter-control:hover {
-  background: #fff3c4;
-  border-color: #dfb536 !important;
+  background: #f7f8fa;
+  border-color: #e8a800 !important;
 }
 
 .search-filter-control:focus-visible {
-  box-shadow: 0 0 0 3px rgb(242 201 76 / 28%);
+  box-shadow: 0 0 0 3px rgb(244 180 0 / 28%);
 }
 
 .search-filter-icon {
@@ -532,13 +541,13 @@ defineExpose({
 .search-filter-label {
   font-size: 12px;
   font-weight: 500;
-  color: #65697a;
+  color: rgb(30 42 68 / 68%);
 }
 
 .search-filter-empty .search-filter-label {
   font-size: 16px;
   font-weight: 600;
-  color: #202238;
+  color: #1e2a44;
 }
 
 .search-filter-value {
@@ -546,7 +555,7 @@ defineExpose({
   overflow: hidden;
   font-size: 14px;
   font-weight: 650;
-  color: #202238;
+  color: #1e2a44;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
@@ -564,24 +573,49 @@ defineExpose({
 }
 
 .open-style-btn {
-  background-color: #fff3c4;
-  border: 1px solid #f2c94c;
+  background-color: #fcfcfd;
+  border: 1px solid #1e2a44;
+}
+
+.open-style-btn:not(.search-filter-empty) {
+  color: #1e2a44 !important;
+  background-color: #d8dee8 !important;
+  border-color: transparent !important;
+}
+
+.open-style-btn:not(.search-filter-empty) .search-filter-label {
+  color: #1e2a44 !important;
+}
+
+.open-style-btn:not(.search-filter-empty) .search-filter-value,
+.open-style-btn:not(.search-filter-empty) .v-icon,
+.open-style-btn:not(.search-filter-empty) .search-filter-content-icon {
+  color: #1e2a44 !important;
 }
 
 .dependent-selected-btn {
-  color: #202238 !important;
-  background-color: #fff3c4 !important;
-  border-color: #f2c94c !important;
+  color: #1e2a44 !important;
+  background-color: #d8dee8 !important;
+  border-color: transparent !important;
 }
 
-.dependent-selected-btn .search-filter-label,
+.dependent-selected-btn .search-filter-label {
+  color: #1e2a44 !important;
+}
+
 .dependent-selected-btn .search-filter-value,
-.dependent-selected-btn .v-icon {
-  color: #202238 !important;
+.dependent-selected-btn .v-icon,
+.dependent-selected-btn .search-filter-content-icon {
+  color: #1e2a44 !important;
 }
 
 .v-btn .search-filter-clear-icon {
-  color: rgb(var(--v-theme-grey500)) !important;
+  color: #667085 !important;
+}
+
+.open-style-btn:not(.search-filter-empty) .search-filter-clear-icon,
+.dependent-selected-btn .search-filter-clear-icon {
+  color: #667085 !important;
 }
 
 .v-btn .search-filter-clear-icon:hover {
@@ -619,7 +653,7 @@ defineExpose({
   margin-right: 72px;
   font-size: 16px;
   font-weight: 650;
-  color: #202238;
+  color: #1e2a44;
 }
 
 .inline-filter-options {
@@ -666,7 +700,7 @@ defineExpose({
 .inline-filter-divider {
   width: 100%;
   margin: 12px 0;
-  border-top: 1px solid #dcdde5;
+  border-top: 1px solid #d8dee8;
 }
 
 .inline-filter-option {
@@ -678,17 +712,17 @@ defineExpose({
   border-radius: 12px !important;
   font-size: 14px;
   line-height: 20px;
-  color: #202238;
-  background: #ffffff;
-  border-color: #dcdde5 !important;
+  color: #1e2a44;
+  background: #fcfcfd;
+  border-color: #d8dee8 !important;
   transition: background-color 160ms ease, border-color 160ms ease, box-shadow 160ms ease;
 }
 
 .inline-filter-option-selected {
-  color: #171633 !important;
-  background: #f2c94c !important;
-  border-color: #f2c94c !important;
-  box-shadow: 0 1px 2px rgb(36 41 47 / 16%);
+  color: #ffffff !important;
+  background: #1e2a44 !important;
+  border-color: #1e2a44 !important;
+  box-shadow: 0 1px 2px rgb(30 42 68 / 16%);
 }
 
 @media only screen and (max-width: 600px) {

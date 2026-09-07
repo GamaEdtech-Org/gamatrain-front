@@ -277,21 +277,21 @@ const openCard = (event) => {
   height: 174px;
   max-width: 1200px;
   cursor: pointer;
-  border: 1px solid #dcdde5;
+  border: 1px solid #d8dee8;
   border-radius: 16px !important;
-  background: #ffffff;
-  box-shadow: 0 1px 2px rgb(36 41 47 / 8%);
+  background: #fcfcfd;
+  box-shadow: 0 1px 2px rgb(30 42 68 / 7%);
   transition: border-color 180ms ease, box-shadow 180ms ease, transform 180ms ease;
 }
 
 .card-search:hover {
-  border-color: #dfb536;
-  box-shadow: 0 6px 18px rgb(36 41 47 / 14%);
+  border-color: #d8dee8;
+  box-shadow: 0 6px 18px rgb(30 42 68 / 12%);
   transform: translateY(-2px);
 }
 
 .card-search:focus-visible {
-  outline: 3px solid rgb(242 201 76 / 34%);
+  outline: 3px solid rgb(244 180 0 / 34%);
   outline-offset: 2px;
 }
 
@@ -311,7 +311,7 @@ const openCard = (event) => {
   aspect-ratio: 63 / 74;
   overflow: hidden;
   border-radius: 15px 0 0 15px;
-  background: #fff3c4;
+  background: #fff8e1;
 }
 
 .cover-image,
@@ -332,13 +332,13 @@ const openCard = (event) => {
 
 .min-width-0 { min-width: 0; }
 
-.publisher-avatar { border: 1px solid #dcdde5; }
+.publisher-avatar { border: 1px solid #d8dee8; }
 
 .card-top { margin-bottom: 8px; }
 
 .publisher-name {
   max-width: 260px;
-  color: #65697a;
+  color: rgb(30 42 68 / 68%);
   font-size: 13px;
   font-weight: 600;
   line-height: 18px;
@@ -347,7 +347,7 @@ const openCard = (event) => {
 .card-title {
   max-width: 100%;
   margin: 0 0 12px;
-  color: #202238 !important;
+  color: #1e2a44 !important;
   font-size: 18px;
   font-weight: 650 !important;
   line-height: 26px;
@@ -356,7 +356,7 @@ const openCard = (event) => {
 .card-description {
   max-width: 100%;
   margin: 0;
-  color: #65697a !important;
+  color: rgb(30 42 68 / 68%) !important;
   font-size: 13px;
   line-height: 20px;
 }
@@ -370,16 +370,28 @@ const openCard = (event) => {
   z-index: 2;
   height: 24px;
   padding: 4px 8px !important;
+  color: rgb(30 42 68 / 68%) !important;
+  background: #f7f8fa !important;
+  border: 1px solid #eef1f5;
   border-radius: 6px !important;
   font-size: 11px;
   line-height: 16px;
+}
+
+.tag-chip:hover {
+  background: #eef1f5 !important;
+  border-color: #d8dee8;
+}
+
+.tag-chip :deep(.v-chip__content) {
+  color: inherit;
 }
 
 .metadata {
   gap: 12px !important;
   min-height: 18px;
   padding-top: 0;
-  color: #65697a;
+  color: rgb(30 42 68 / 68%);
   font-size: 12px;
   line-height: 18px;
 }

@@ -55,12 +55,12 @@ defineProps({
   gap: 24px;
   padding: 12px 16px;
   margin-top: 0;
-  color: #202238;
+  color: #1e2a44;
   text-decoration: none;
-  background: #ffffff;
-  border: 1px solid #171633;
+  background: #fcfcfd;
+  border: 1px solid #d8dee8;
   border-radius: 12px;
-  box-shadow: 0 1px 2px rgb(36 41 47 / 8%);
+  box-shadow: 0 1px 2px rgb(30 42 68 / 7%);
   transition: transform 180ms ease-out, box-shadow 180ms ease-out;
 }
 
@@ -79,16 +79,21 @@ defineProps({
   align-items: center;
   justify-content: center;
   color: #ffffff;
-  background: #171633;
+  background: #1e2a44;
   border-radius: 10px;
 }
 
 @media (hover: hover) and (pointer: fine) {
   .subject-directory-card:hover {
     transform: translateY(-1px);
-    border-color: #dfb536;
-    box-shadow: 0 6px 18px rgb(36 41 47 / 14%);
+    border-color: #e8a800;
+    box-shadow: 0 6px 18px rgb(30 42 68 / 12%);
   }
+}
+
+.subject-directory-card:focus-visible {
+  outline: 3px solid rgb(244 180 0 / 30%);
+  outline-offset: 2px;
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -112,7 +117,7 @@ defineProps({
 
 .subject-directory-card__title {
   overflow: hidden;
-  color: #202238;
+  color: #1e2a44;
   font-size: 18px;
   font-weight: 700;
   line-height: 24px;
@@ -121,7 +126,7 @@ defineProps({
 }
 
 .subject-directory-card__subtitle {
-  color: #65697a;
+  color: rgb(30 42 68 / 68%);
   font-size: 14px;
   font-weight: 400;
   line-height: 20px;
@@ -134,18 +139,18 @@ defineProps({
   align-items: center;
   gap: 8px;
   padding: 8px 14px;
-  color: #171633;
+  color: #1e2a44;
   font-size: 14px;
   font-weight: 600;
   line-height: 20px;
-  background: #f2c94c;
-  border: 1px solid #f2c94c;
+  background: #f4b400;
+  border: 1px solid #f4b400;
   border-radius: 10px;
 }
 
 .subject-directory-card:hover .subject-directory-card__action {
-  background: #dfb536;
-  border-color: #dfb536;
+  background: #e8a800;
+  border-color: #e8a800;
 }
 
 @media (max-width: 600px) {

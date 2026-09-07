@@ -42,7 +42,7 @@
         v-model="textSearch"
         label="Search anything...."
         variant="outlined"
-        color="#F2C94C"
+        color="#F4B400"
         max-width="330"
         density="compact"
         hide-details
@@ -54,7 +54,7 @@
           <v-btn
             icon
             varient="text"
-            color="#F2C94C"
+            color="#F4B400"
             width="50"
             class="rounded-ts rounded-te-xl rounded-be-xl rounded-bs h-100 ml-n2"
             flat
@@ -215,6 +215,7 @@
                   :inline-options="true"
                   :inline-allow-clear="entry.filter.inlineAllowClear"
                   :inline-grouped="true"
+                  :inline-items-per-row="entry.filter.inlineItemsPerRow"
                   :inline-divider-after="inlineIndex === 0 && inlineFilterEntries.length > 1"
                   :inline-leading-option-slots="entry.filter.inlineLeadingOptionSlots"
                   :item-title="entry.filter.itemTitle"
@@ -411,7 +412,7 @@
             Clear All
           </v-btn>
           <v-btn
-            color="#F2C94C"
+            color="#F4B400"
             rounded="xl"
             height="40"
             width="200"
@@ -970,23 +971,27 @@ const clearAllFilter = async () => {
 }
 
 .header-keyword-search :deep(.v-field) {
-  color: #202238;
-  background: #ffffff;
+  color: #1e2a44;
+  background: #fcfcfd;
   border-radius: 12px;
 }
 
 .header-keyword-search :deep(.v-field__outline) {
-  color: #8c959f;
+  color: #d8dee8;
 }
 
 .header-keyword-search :deep(.v-field--focused .v-field__outline) {
-  color: #f2c94c;
+  color: #f4b400;
 }
 
 @media (min-width: 960px) {
   .header-search-teleport-source {
     display: none !important;
   }
+}
+
+.filter-clear-icon {
+  color: #667085 !important;
 }
 
 .filter-clear-icon:hover {
@@ -1011,14 +1016,14 @@ const clearAllFilter = async () => {
   position: sticky;
   top: 0;
   z-index: 2;
-  background: #f7f7f4;
+  background: #fcfcfd;
 }
 .filter-list-sticky-host {
   display: contents !important;
 }
 .desktop-filter-controls,
 .persistent-search-content {
-  background: #f7f7f4;
+  background: #fcfcfd;
 }
 .desktop-filter-controls-content {
   transform-origin: top center;
@@ -1047,10 +1052,10 @@ const clearAllFilter = async () => {
   padding: 16px 24px 0 0;
   margin-right: auto;
   margin-top: 16px;
-  background: #ffffff;
-  border: 1px solid #dcdde5;
+  background: #fcfcfd;
+  border: 1px solid #d8dee8;
   border-radius: 12px;
-  box-shadow: 0 1px 2px rgb(36 41 47 / 8%);
+  box-shadow: 0 1px 2px rgb(30 42 68 / 7%);
 }
 
 .search-results-scroll-region {
@@ -1059,11 +1064,11 @@ const clearAllFilter = async () => {
 
 .desktop-filter-sidebar-header {
   padding: 16px;
-  border-bottom: 1px solid #dcdde5;
+  border-bottom: 1px solid #d8dee8;
 }
 
 .desktop-filter-sidebar-title {
-  color: #202238;
+  color: #1e2a44;
   font-size: 16px;
   font-weight: 700;
   line-height: 24px;
@@ -1139,7 +1144,7 @@ const clearAllFilter = async () => {
     align-content: stretch;
     margin: 0 auto;
     overflow: hidden;
-    background: #f7f7f4;
+    background: #fcfcfd;
   }
 
   .search-workspace-heading {
@@ -1164,7 +1169,7 @@ const clearAllFilter = async () => {
     align-items: stretch;
     justify-content: stretch !important;
     overflow: hidden;
-    background: #f7f7f4;
+    background: #fcfcfd;
   }
 
   .filter-list-sidebar-layout :deep(.services-navigation) {
@@ -1183,32 +1188,50 @@ const clearAllFilter = async () => {
     grid-row: 1 / span 2;
     min-width: 0;
     min-height: 0;
+    max-height: 100%;
     align-items: stretch;
-    align-self: start;
-    overflow: hidden;
-    background: #ffffff;
-    border: 1px solid #dcdde5;
+    align-self: stretch;
+    overflow-x: hidden;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    scrollbar-color: #d8dee8 transparent;
+    scrollbar-width: thin;
+    background: #fcfcfd;
+    border: 1px solid #d8dee8;
     border-radius: 12px;
-    box-shadow: 0 1px 2px rgb(36 41 47 / 8%);
+    box-shadow: 0 1px 2px rgb(30 42 68 / 7%);
+  }
+
+  .filter-list-sidebar-layout .desktop-filter-controls-shell::-webkit-scrollbar {
+    width: 6px;
+  }
+
+  .filter-list-sidebar-layout .desktop-filter-controls-shell::-webkit-scrollbar-thumb {
+    background: #d8dee8;
+    border-radius: 999px;
+  }
+
+  .filter-list-sidebar-layout .desktop-filter-controls-shell::-webkit-scrollbar-track {
+    background: transparent;
   }
 
   .filter-list-sidebar-layout .desktop-filter-controls {
     min-width: 0;
-    background: #ffffff;
+    background: #fcfcfd;
   }
 
   .filter-list-sidebar-layout .desktop-filter-controls-content {
     display: block !important;
     min-width: 0;
     padding-bottom: 0;
-    background: #ffffff;
+    background: #fcfcfd;
   }
 
   .filter-list-sidebar-layout :deep(.services-filter-container) {
     display: block;
     max-width: none;
     padding: 0;
-    background: #ffffff;
+    background: #fcfcfd;
   }
 
   .filter-list-sidebar-layout :deep(.services-filter-container > div:first-child) {
@@ -1253,13 +1276,22 @@ const clearAllFilter = async () => {
   }
 
   .filter-list-sidebar-layout :deep(.search-filter-control:hover) {
-    background: #fff3c4;
+    background: #f7f8fa;
   }
 
-  .filter-list-sidebar-layout :deep(.search-filter-control.open-style-btn),
+  .filter-list-sidebar-layout :deep(.search-filter-control.open-style-btn) {
+    background: #fcfcfd;
+    border-bottom-color: #1e2a44 !important;
+  }
+
+  .filter-list-sidebar-layout :deep(.search-filter-control.open-style-btn:not(.search-filter-empty)) {
+    background: #d8dee8;
+    border-bottom-color: transparent !important;
+  }
+
   .filter-list-sidebar-layout :deep(.search-filter-control.dependent-selected-btn) {
-    background: #fff3c4;
-    border-bottom-color: #f2c94c !important;
+    background: #d8dee8;
+    border-bottom-color: transparent !important;
   }
 
   .filter-list-sidebar-layout :deep(.search-filter-value) {
@@ -1269,7 +1301,7 @@ const clearAllFilter = async () => {
   .filter-list-sidebar-layout .inline-filter-group-wrapper {
     display: block;
     max-width: none;
-    border-top: 1px solid #dcdde5;
+    border-top: 1px solid #d8dee8;
   }
 
   .filter-list-sidebar-layout :deep(.inline-filter-group) {
@@ -1280,7 +1312,7 @@ const clearAllFilter = async () => {
     gap: 0 !important;
     padding: 0 16px !important;
     margin: 0 !important;
-    background: #ffffff;
+    background: #fcfcfd;
     border: 0 !important;
     border-radius: 0 !important;
     box-shadow: none;
@@ -1309,7 +1341,7 @@ const clearAllFilter = async () => {
   .filter-list-sidebar-layout :deep(.inline-filter-label) {
     display: block;
     margin: 0 0 8px 36px;
-    color: #202238;
+    color: #1e2a44;
     font-size: 16px;
     font-weight: 600;
     line-height: 24px;
@@ -1345,9 +1377,9 @@ const clearAllFilter = async () => {
     overscroll-behavior: contain;
     scrollbar-gutter: stable;
     background: transparent;
-    border: 1px solid #dcdde5;
+    border: 1px solid #d8dee8;
     border-radius: 12px;
-    box-shadow: 0 1px 2px rgb(36 41 47 / 8%);
+    box-shadow: 0 1px 2px rgb(30 42 68 / 7%);
   }
 
   .filter-list-sidebar-layout :deep(.subject-directory-container) {

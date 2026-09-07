@@ -76,7 +76,7 @@ const formatCount = (serviceId) => {
   max-width: 1200px;
   min-width: 0;
   padding: 0;
-  border-bottom: 1px solid #dcdde5;
+  border-bottom: 1px solid #d8dee8;
   overflow-x: auto;
   scrollbar-width: none;
 }
@@ -105,8 +105,8 @@ const formatCount = (serviceId) => {
   padding: 0 20px;
   border: 0;
   border-radius: 12px 12px 0 0;
-  color: #202238;
-  background: #ffffff;
+  color: #1e2a44;
+  background: #fcfcfd;
   font-size: 15px;
   font-weight: 600;
   letter-spacing: normal;
@@ -116,12 +116,17 @@ const formatCount = (serviceId) => {
 
 .services-navigation__item--active {
   color: #ffffff;
-  background-color: #171633;
-  box-shadow: inset 0 -4px 0 #f2c94c;
+  background-color: #1e2a44;
+  box-shadow: inset 0 -3px 0 #f4b400;
 }
 
 .services-navigation__item:not(.services-navigation__item--active):hover {
-  background: #fff3c4;
+  background: #f7f8fa;
+}
+
+.services-navigation__item:focus-visible {
+  outline: 3px solid rgb(244 180 0 / 30%);
+  outline-offset: -3px;
 }
 
 .services-navigation__item :deep(.v-btn__content) {
@@ -145,7 +150,7 @@ const formatCount = (serviceId) => {
   letter-spacing: 0;
   line-height: 1;
   text-indent: 0;
-  color: #171633;
+  color: #1e2a44;
 }
 
 .services-navigation__icon img {
@@ -208,14 +213,14 @@ const formatCount = (serviceId) => {
 
 .services-navigation__count {
   min-height: 16px;
-  color: #f2c94c;
+  color: #f4b400;
   font-size: 14px;
   font-weight: 700;
   line-height: 18px;
 }
 
 .services-navigation__item:not(.services-navigation__item--active) .services-navigation__count {
-  color: #65697a;
+  color: rgb(30 42 68 / 68%);
 }
 
 .services-navigation__title {
