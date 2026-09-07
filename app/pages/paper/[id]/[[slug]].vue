@@ -55,6 +55,7 @@
           :alt="pageTitle"
           :views="contentData.views"
           :score="contentData.ref_score"
+          :q-file-pages="contentData.q_file_pages"
           @share="openShare = true"
         />
       </v-col>

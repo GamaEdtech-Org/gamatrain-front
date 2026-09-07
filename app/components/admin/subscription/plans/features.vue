@@ -58,9 +58,17 @@
         class="w-100 d-flex align-center justify-space-between ga-2 border rounded-lg pa-2"
       >
         <div class="d-flex flex-column align-start justify-start overflow-hidden ga-1">
-          <span class="text-grey700 text-h6 font-weight-bold text-truncate">
-            {{ group.features.map(feature => feature.featureName).join(', ') }}
-          </span>
+          <div class="d-flex align-center ga-1">
+            <span class="text-grey700 text-h6 font-weight-bold text-truncate">
+              {{ group.features.map(feature => feature.featureName).join(', ') }}
+            </span>
+            <span
+              v-if="editingIndex === index"
+              class="text-primary text-h6 font-weight-bold"
+            >
+              (editing)
+            </span>
+          </div>
           <span class="text-grey500 text-h6 text-truncate">
             {{ group.features.map(feature => feature.featureCode).join(', ') }}
           </span>
@@ -75,18 +83,33 @@
           </span>
         </div>
 
-        <v-btn
-          icon
-          flat
-          @click="removeFeatureGroup(index)"
-        >
-          <v-icon
-            size="20"
-            color="grey800"
+        <div class="d-flex align-center ga-1">
+          <v-btn
+            icon
+            flat
+            @click="startEditFeatureGroup(index)"
           >
-            md:delete
-          </v-icon>
-        </v-btn>
+            <v-icon
+              size="20"
+              color="grey800"
+            >
+              md:edit
+            </v-icon>
+          </v-btn>
+
+          <v-btn
+            icon
+            flat
+            @click="removeFeatureGroup(index)"
+          >
+            <v-icon
+              size="20"
+              color="grey800"
+            >
+              md:delete
+            </v-icon>
+          </v-btn>
+        </div>
       </div>
     </div>
 
@@ -97,8 +120,20 @@
       class="w-100 d-flex flex-column ga-2"
     >
       <div class="w-100 d-flex flex-column ga-1">
-        <div class="text-h6 text-grey700 ml-2">
-          Features
+        <div class="w-100 d-flex align-center justify-space-between">
+          <div class="text-h6 text-grey700 ml-2">
+            {{ isEditing ? 'Edit Feature Group' : 'Features' }}
+          </div>
+
+          <v-btn
+            v-if="isEditing"
+            variant="text"
+            size="small"
+            color="grey700"
+            @click="cancelEditFeatureGroup"
+          >
+            Cancel
+          </v-btn>
         </div>
 
         <v-select
@@ -196,7 +231,7 @@
         flat
         @click="addFeature"
       >
-        Add Feature
+        {{ isEditing ? 'Update Feature' : 'Add Feature' }}
       </v-btn>
     </v-form>
 
@@ -265,6 +300,8 @@ const selectedFeatureIds = ref<number[]>([])
 const newDescription = ref('')
 const intervalLimits = reactive<IntervalLimitState>(createDefaultIntervalLimits())
 const isAddFormValid = ref(false)
+const editingIndex = ref<number | null>(null)
+const isEditing = computed(() => editingIndex.value !== null)
 
 // Only the intervals this plan is actually sold at - falls back to the full list when the plan has no
 // prices yet, so the limit form is never left with nothing to fill in.
@@ -313,6 +350,31 @@ const resetAddForm = () => {
   selectedFeatureIds.value = []
   newDescription.value = ''
   Object.assign(intervalLimits, createDefaultIntervalLimits())
+  editingIndex.value = null
+}
+
+// Loads an existing group's features/limits/description back into the add-form so it can be
+// resubmitted in place, turning the "Add Feature" flow into an "Update Feature" one.
+const startEditFeatureGroup = (index: number) => {
+  const group = selectedFeatureGroups.value[index]
+  if (!group) return
+
+  editingIndex.value = index
+  selectedFeatureIds.value = group.features.map(feature => feature.featureId)
+  newDescription.value = group.description ?? ''
+
+  const nextIntervalLimits = createDefaultIntervalLimits()
+  group.limits.forEach((limit) => {
+    nextIntervalLimits[limit.billingInterval] = {
+      unlimited: limit.limit == null,
+      limit: limit.limit,
+    }
+  })
+  Object.assign(intervalLimits, nextIntervalLimits)
+}
+
+const cancelEditFeatureGroup = () => {
+  resetAddForm()
 }
 
 const addFeature = () => {
@@ -331,7 +393,8 @@ const addFeature = () => {
   }
 
   const selectedIds = selectedFeatureIds.value.map(Number)
-  const isDuplicateFeature = selectedFeatureGroups.value.some((group) => {
+  const isDuplicateFeature = selectedFeatureGroups.value.some((group, index) => {
+    if (index === editingIndex.value) return false
     return group.features.some(feature => selectedIds.includes(feature.featureId))
   })
 
@@ -346,7 +409,7 @@ const addFeature = () => {
     })
     .filter((feature): feature is AdminSubscriptionFeatureDTO => feature !== null)
 
-  selectedFeatureGroups.value.push({
+  const featureGroup: AdminSubscriptionPlanFeatureGroupDTO = {
     features: selectedFeatures.map(feature => ({
       featureId: feature.id,
       featureCode: feature.code,
@@ -357,13 +420,27 @@ const addFeature = () => {
       limit: intervalLimits[interval].unlimited ? null : Number(intervalLimits[interval].limit),
     })),
     description: isDescriptionRequired.value ? newDescription.value : '',
-  })
+  }
+
+  if (editingIndex.value !== null) {
+    selectedFeatureGroups.value.splice(editingIndex.value, 1, featureGroup)
+  }
+  else {
+    selectedFeatureGroups.value.push(featureGroup)
+  }
 
   resetAddForm()
 }
 
 const removeFeatureGroup = (index: number) => {
   selectedFeatureGroups.value.splice(index, 1)
+
+  if (editingIndex.value === index) {
+    cancelEditFeatureGroup()
+  }
+  else if (editingIndex.value !== null && index < editingIndex.value) {
+    editingIndex.value -= 1
+  }
 }
 
 const saveFeatures = async () => {

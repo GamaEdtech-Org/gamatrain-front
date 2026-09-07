@@ -30,7 +30,12 @@ export interface AdminSchoolContributionNewDataDTO {
   faxNumber: string
   phoneNumber: string
   quarter: string
-  tags: number[]
+  tags: {
+    id: number
+    name: string
+    icon: string
+    tagType: string
+  }[]
   boards: number[]
   tuition: number
   description: string

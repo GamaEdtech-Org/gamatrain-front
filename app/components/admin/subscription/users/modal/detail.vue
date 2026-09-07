@@ -30,6 +30,33 @@
         <span class="label">{{ field.label }}</span>
         <span class="value">{{ field.value }}</span>
       </div>
+
+      <div
+        v-if="quotaStatuses.length > 0"
+        class="w-100 d-flex flex-column ga-2 mt-2"
+      >
+        <v-divider class="w-100" />
+        <span class="text-h5 font-weight-bold text-grey700">Quota</span>
+
+        <div
+          v-for="(quota, index) in quotaStatuses"
+          :key="index"
+          class="w-100 d-flex flex-column ga-1 border rounded-lg pa-2"
+        >
+          <div class="w-100 d-flex align-center justify-space-between ga-2">
+            <span class="text-h6 font-weight-bold text-grey700">{{ quota.title }}</span>
+            <span class="text-h6 text-grey600 text-no-wrap">{{ quota.usageLabel }}</span>
+          </div>
+
+          <v-progress-linear
+            v-if="quota.percentUsed !== null"
+            :model-value="quota.percentUsed"
+            height="8"
+            rounded
+            :color="quota.percentUsed >= 100 ? 'error' : quota.percentUsed >= 80 ? 'warning' : 'primary'"
+          />
+        </div>
+      </div>
     </template>
   </div>
 </template>
@@ -80,6 +107,7 @@ const fields: FieldConfig[] = [
   { key: 'cancelAtPeriodEnd', label: 'Cancel At Period End :', formatter: formatBoolean, full: true },
   { key: 'pendingSwitchPlanId', label: 'Pending Switch Plan ID :', full: true },
   { key: 'pendingSwitchPlanTitle', label: 'Pending Switch Plan Title :', full: true },
+  { key: 'pendingSwitchBillingInterval', label: 'Pending Switch Billing Interval :', full: true },
   { key: 'lastPaymentFailedDate', label: 'Last Payment Failed Date :', formatter: formatNullableDate, full: true },
   { key: 'externalSubscriptionId', label: 'External Subscription ID :', full: true },
 ]
@@ -127,6 +155,18 @@ const formatValue = (value: AdminUserSubscriptionDetailDTO[keyof AdminUserSubscr
 
   return value.toString()
 }
+
+// Live quota status (Used/Limit per feature group) - only present on this single-subscription
+// detail response, never on the paged list.
+const quotaStatuses = computed(() => {
+  return (subscription.value?.featureGroups ?? []).map((quota) => {
+    const title = quota.description || quota.features.map(feature => feature.featureName).join(', ')
+    const percentUsed = quota.limit === null ? null : Math.min(100, (quota.used / quota.limit) * 100)
+    const usageLabel = quota.limit === null ? `${quota.used} used · Unlimited` : `${quota.used} / ${quota.limit}`
+
+    return { title, usageLabel, percentUsed }
+  })
+})
 
 const fetchDetail = async () => {
   const response = await getItemById(props.id)

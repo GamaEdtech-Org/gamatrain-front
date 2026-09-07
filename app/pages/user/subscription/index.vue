@@ -247,7 +247,7 @@ import { BILLING_INTERVAL_PERIOD_LABEL } from '@/constants'
 
 definePageMeta({
   layout: 'dashboard-layout',
-  middleware: ['auth'],
+  middleware: ['auth', 'user-type'],
 })
 
 useHead({

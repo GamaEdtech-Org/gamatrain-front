@@ -145,14 +145,14 @@
         </v-btn>
       </template>
 
-      <template #[`item.sourceWallet`]="{ item }">
+      <template #[`item.transactionId`]="{ item }">
         <div
           class="text-grey600 text-h5 d-flex justify-start align-center font-weight-bold ga-2 cursor-pointer"
-          @click="copyWalletAddress(item.sourceWallet)"
+          @click="copyToClipboard(item.transactionId)"
         >
-          {{ item.sourceWallet ? shortenWallet(item.sourceWallet) : 'unknown' }}
+          {{ item.transactionId ? shortenText(item.transactionId) : 'unknown' }}
 
-          <v-icon v-if="item.sourceWallet">
+          <v-icon v-if="item.transactionId">
             md:content_copy_outlined
           </v-icon>
         </div>
@@ -283,7 +283,7 @@ const headers: DataTableHeader<AdminPaymentDTO>[] = [
     dateFormat: 'DD/MM/YYYY HH:mm:ss',
     emptyText: 'Pending',
   },
-  { title: 'Source Wallet', key: 'sourceWallet', sortable: false, width: '30vw', align: 'start' },
+  { title: 'Transaction Id', key: 'transactionId', sortable: false, width: '30vw', align: 'start' },
   { title: 'Action', key: 'action', sortable: false, width: '10vw' },
 ]
 const showSearchModal = ref(false)
@@ -388,18 +388,18 @@ const getColorBadgeStatus = (status: StatusPayment) => {
       return 'warning'
   }
 }
-const shortenWallet = (address: string) => {
+const shortenText = (value: string) => {
   return (
-    address.slice(0, 4)
+    value.slice(0, 4)
     + '...'
-    + address.slice(-4)
+    + value.slice(-4)
   )
 }
 
-const copyWalletAddress = (address: string | null | undefined) => {
-  if (address) {
-    navigator.clipboard.writeText(address)
-    $toast.info('Wallet address copy in your clipboard')
+const copyToClipboard = (value: string | null | undefined) => {
+  if (value) {
+    navigator.clipboard.writeText(value)
+    $toast.info('Copied to clipboard')
   }
 }
 

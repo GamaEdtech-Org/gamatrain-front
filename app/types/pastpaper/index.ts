@@ -24,6 +24,7 @@ export interface PastPaperDTO {
   description: string
   views: number
   ref_score: number
+  q_file_pages?: string
   edu_year: string
   section: string
   base: string

@@ -241,6 +241,22 @@ export interface AdminUserSubscriptionListDTO {
   gateway: PaymentGateway
 }
 
+export interface AdminUserSubscriptionQuotaFeatureDTO {
+  featureId: number
+  featureCode: string
+  featureName: string
+}
+
+export interface AdminUserSubscriptionQuotaStatusDTO {
+  features: AdminUserSubscriptionQuotaFeatureDTO[]
+  // null means unlimited.
+  limit: number | null
+  used: number
+  // limit minus used, floored at 0; null when limit is null (unlimited).
+  remaining: number | null
+  description: string | null
+}
+
 export interface AdminUserSubscriptionDetailDTO {
   id: number
   userId: number
@@ -258,9 +274,13 @@ export interface AdminUserSubscriptionDetailDTO {
   cancelAtPeriodEnd: boolean
   pendingSwitchPlanId: number | null
   pendingSwitchPlanTitle: string | null
+  pendingSwitchBillingInterval: BillingInterval | null
   lastPaymentFailedDate: string | null
   externalSubscriptionId: string | null
   gateway: PaymentGateway
+  // Live quota status (Used/Limit per feature group) - only present on the single-subscription
+  // detail response, never on the paged list.
+  featureGroups: AdminUserSubscriptionQuotaStatusDTO[] | null
 }
 
 export interface SearchFilterAdminUserSubscription {
