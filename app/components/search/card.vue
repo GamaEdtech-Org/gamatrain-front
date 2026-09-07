@@ -428,7 +428,16 @@ const openCard = (event) => {
 }
 
 @media (max-width: 599px) {
-  .card-search { height: 134px; }
+  .card-search { height: 174px; }
+
+  .card-body {
+    padding: 10px 12px 8px;
+  }
+
+  .card-top {
+    flex-shrink: 0;
+    margin-bottom: 4px;
+  }
 
   .publisher-avatar {
     width: 26px !important;
@@ -441,20 +450,33 @@ const openCard = (event) => {
   }
 
   .card-title {
+    flex-shrink: 0;
+    margin-bottom: 2px;
     font-size: 14px;
     line-height: 20px;
   }
 
   .card-description {
+    flex-shrink: 0;
     font-size: 12px;
     line-height: 18px;
   }
 
   .subject-tags {
     flex-wrap: nowrap !important;
+    flex-shrink: 0;
+    margin-block: 4px;
     overflow: hidden;
   }
 
-  .metadata { gap: 8px !important; }
+  .metadata {
+    flex-shrink: 0;
+    gap: 8px !important;
+  }
+
+  .mobile-indicators {
+    flex-shrink: 0;
+    margin-top: 4px;
+  }
 }
 </style>
