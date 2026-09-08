@@ -164,6 +164,7 @@
 
 <script setup lang="ts">
 import type { ApiResult, PastPaperDTO, AppError } from '@/types'
+import { DEFAULT_BOARD_ID } from '@/constants'
 
 interface BreadCrumb {
   text: string
@@ -248,11 +249,68 @@ const schema = computed(() => {
   })
 })
 
+const CAMBRIDGE_SESSION_MAP: Record<
+  string,
+  Record<string, { display: string, code: string }>
+> = {
+  22: {
+    3: { display: 'Feb March', code: 'F/M' },
+    6: { display: 'May June', code: 'M/J' },
+    11: { display: 'Oct Nov', code: 'O/N' },
+  },
+  4161: {
+    3: { display: 'Feb March', code: 'F/M' },
+    6: { display: 'May June', code: 'M/J' },
+    11: { display: 'Oct Nov', code: 'O/N' },
+  },
+  6535: {
+    3: { display: 'Feb March', code: 'F/M' },
+    6: { display: 'May June', code: 'M/J' },
+    11: { display: 'Oct Nov', code: 'O/N' },
+  },
+  23: {
+    6: { display: 'May June', code: 'M/J' },
+    11: { display: 'Oct Nov', code: 'O/N' },
+  },
+  6374: {
+    6: { display: 'May June', code: 'M/J' },
+    11: { display: 'Oct Nov', code: 'O/N' },
+  },
+  6533: {
+    6: { display: 'May June', code: 'M/J' },
+    11: { display: 'Oct Nov', code: 'O/N' },
+  },
+  6635: {
+    3: { display: 'Feb March', code: 'F/M' },
+    4: { display: 'April May', code: 'A/M' },
+    5: { display: 'April May', code: 'A/M' },
+    10: { display: 'Oct Nov', code: 'O/N' },
+  },
+  6639: {
+    3: { display: 'Feb March', code: 'F/M' },
+    4: { display: 'April May', code: 'A/M' },
+    5: { display: 'April May', code: 'A/M' },
+    10: { display: 'Oct Nov', code: 'O/N' },
+  },
+}
+
 const setMetaData = () => {
   if (!contentData.value) return
 
   const dto: PastPaperDTO = contentData.value
-  const { section_title, base_title, title, is_paper } = dto
+  const {
+    section,
+    base,
+    section_title,
+    base_title,
+    lesson_title,
+    test_type_title,
+    edu_year,
+    edu_month,
+    variant_title,
+    title,
+    is_paper,
+  } = dto
 
   // Build title parts safely from DTO
   const titleParts = [
@@ -266,6 +324,36 @@ const setMetaData = () => {
   if (is_paper) {
     pageTitle.value = `${baseTitle} past paper`
     pageDescribe.value = `Download ${baseTitle} past paper with mark scheme (MS). Access a full collection of past papers for study, revision, and exam practice.`
+
+    if (String(section) === String(DEFAULT_BOARD_ID)) {
+      const subjectMatch = lesson_title
+        ?.trim()
+        .match(/^(.+?)\s*\((\d{4})\)$/)
+      const paperMatch = test_type_title
+        ?.trim()
+        .match(/^Paper\s+(\d+)$/)
+      const normalizedYear = edu_year?.trim() ?? ''
+      const session = CAMBRIDGE_SESSION_MAP[String(base)]?.[String(edu_month)]
+      const gradeTitle = base_title?.trim()
+
+      if (
+        subjectMatch
+        && paperMatch
+        && /^\d{4}$/.test(normalizedYear)
+        && session
+        && gradeTitle
+      ) {
+        const [, subjectName, subjectCode] = subjectMatch
+        const paperNumber = paperMatch[1]
+        const normalizedVariantTitle = variant_title?.trim() ?? ''
+        const paperVariantCode = /^\d+$/.test(normalizedVariantTitle)
+          ? `${paperNumber}${normalizedVariantTitle}`
+          : paperNumber.padStart(2, '0')
+        const shortYear = normalizedYear.slice(-2)
+
+        pageDescribe.value = `Download Cambridge ${gradeTitle} ${subjectName} ${subjectCode}/${paperVariantCode} ${session.display} ${normalizedYear} question paper(QP) with mark scheme (MS) pdf. Access paper ${paperNumber}, ${subjectCode}/${paperVariantCode}/${session.code}/${shortYear} question paper pdf with answers for your upcoming exam series preparation.`
+      }
+    }
   }
   else {
     pageTitle.value = baseTitle
