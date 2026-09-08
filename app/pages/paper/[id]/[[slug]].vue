@@ -163,7 +163,7 @@
 </template>
 
 <script setup lang="ts">
-import type { ApiResult, PastPaperDTO, AppError } from '@/types'
+import type { ApiResult, PastPaperDTO, FilesDTO, AppError } from '@/types'
 import { DEFAULT_BOARD_ID } from '@/constants'
 
 interface BreadCrumb {
@@ -294,6 +294,80 @@ const CAMBRIDGE_SESSION_MAP: Record<
   },
 }
 
+interface CambridgeFileType {
+  code: string
+  label: string
+}
+
+const CAMBRIDGE_FILENAME_SESSION_CODES: Record<string, string> = {
+  'M/J': 's',
+  'A/M': 's',
+  'O/N': 'w',
+  'F/M': 'm',
+}
+
+const CAMBRIDGE_EXTRA_FILE_TYPES: Record<string, CambridgeFileType> = {
+  'insert': { code: 'in', label: 'insert' },
+  'audio file': { code: 'sf', label: 'sound file (SF)' },
+  'confidential instructions': { code: 'ci', label: 'confidential instructions' },
+  'confidental instructions': { code: 'ci', label: 'confidential instructions' },
+  "teacher's notes": { code: 'tn', label: "teacher's notes" },
+  'teacher notes': { code: 'tn', label: "teacher's notes" },
+  'transcript': { code: 'qr', label: 'transcript (QR)' },
+  'map file': { code: 'i2', label: 'map file' },
+  'pre released material': { code: 'pm', label: 'pre released material' },
+}
+
+const getCambridgeFilenameSessionCode = (seoSessionCode: string) =>
+  CAMBRIDGE_FILENAME_SESSION_CODES[seoSessionCode]
+
+const getCambridgeAvailableFiles = (
+  files: FilesDTO | undefined,
+  filenamePrefix: string,
+  paperVariantCode: string,
+) => {
+  if (!files?.pdf || !files.answer) return null
+
+  const availableFiles: string[] = []
+
+  if (files.pdf.exist) {
+    availableFiles.push(
+      `question paper (QP) ${filenamePrefix}_qp_${paperVariantCode}`,
+    )
+  }
+
+  if (
+    files.answer.exist
+    && String(files.answer.ext).toLowerCase() !== 'word'
+  ) {
+    availableFiles.push(
+      `mark scheme (MS) ${filenamePrefix}_ms_${paperVariantCode}`,
+    )
+  }
+
+  const addedExtraFileCodes = new Set<string>()
+
+  for (const extraFile of files.extra ?? []) {
+    const normalizedTypeTitle = extraFile.type_title
+      ?.trim()
+      .toLowerCase()
+      .replaceAll('’', "'")
+
+    if (!normalizedTypeTitle) continue
+
+    const fileType = CAMBRIDGE_EXTRA_FILE_TYPES[normalizedTypeTitle]
+
+    if (!fileType || addedExtraFileCodes.has(fileType.code)) continue
+
+    availableFiles.push(
+      `${fileType.label} ${filenamePrefix}_${fileType.code}_${paperVariantCode}`,
+    )
+    addedExtraFileCodes.add(fileType.code)
+  }
+
+  return availableFiles.length > 0 ? availableFiles : null
+}
+
 const setMetaData = () => {
   if (!contentData.value) return
 
@@ -350,8 +424,24 @@ const setMetaData = () => {
           ? `${paperNumber}${normalizedVariantTitle}`
           : paperNumber.padStart(2, '0')
         const shortYear = normalizedYear.slice(-2)
+        const currentCambridgeDescription = `Download Cambridge ${gradeTitle} ${subjectName} ${subjectCode}/${paperVariantCode} ${session.display} ${normalizedYear} question paper(QP) with mark scheme (MS) pdf. Access paper ${paperNumber}, ${subjectCode}/${paperVariantCode}/${session.code}/${shortYear} question paper pdf with answers for your upcoming exam series preparation.`
 
-        pageDescribe.value = `Download Cambridge ${gradeTitle} ${subjectName} ${subjectCode}/${paperVariantCode} ${session.display} ${normalizedYear} question paper(QP) with mark scheme (MS) pdf. Access paper ${paperNumber}, ${subjectCode}/${paperVariantCode}/${session.code}/${shortYear} question paper pdf with answers for your upcoming exam series preparation.`
+        pageDescribe.value = currentCambridgeDescription
+
+        const filenameSessionCode = getCambridgeFilenameSessionCode(session.code)
+
+        if (filenameSessionCode) {
+          const filenamePrefix = `${subjectCode}_${filenameSessionCode}${shortYear}`
+          const availableFiles = getCambridgeAvailableFiles(
+            dto.files,
+            filenamePrefix,
+            paperVariantCode,
+          )
+
+          if (availableFiles) {
+            pageDescribe.value = `Download ${subjectCode}/${paperVariantCode}/${session.code}/${shortYear} Cambridge ${gradeTitle} ${subjectName.trim()} ${subjectCode}/${paperVariantCode} Paper ${paperNumber} ${session.display} ${normalizedYear} past paper. In this page you can find ${availableFiles.join(', ')} pdfs available for your upcoming exam series preparation.`
+          }
+        }
       }
     }
   }
