@@ -4,28 +4,6 @@
     class="w-100 d-flex flex-column"
     @submit.prevent="submitTicket"
   >
-    <div class="w-100 d-flex flex-column align-start justify-start ga-1 mt-2">
-      <div class="text-h6 text-grey700 font-weight-medium ml-2">
-        Full name
-      </div>
-      <v-text-field
-        v-model="form.fullName"
-        rounded="pill"
-        height="48"
-        placeholder="Enter..."
-        variant="outlined"
-        autocomplete="off"
-        persistent-clear
-        base-color="grey200"
-        color="primary"
-        active-color="primary"
-        bg-color="white"
-        class="w-100"
-        density="compact"
-        :rules="[required]"
-      />
-    </div>
-
     <div class="w-100 d-flex flex-column align-start justify-start ga-1">
       <div class="text-h6 text-grey700 font-weight-medium ml-2">
         Email
@@ -107,11 +85,11 @@
         bg-color="white"
         class="w-100"
         clearable
-        accept=".zip,.png,.jpg,.jpeg,.gif,.webp,.svg"
+        :accept="allowedFileTypes.join(',')"
         prepend-icon=""
         prepend-inner-icon="md:attach_file"
         density="compact"
-        :rules="[fileSizeRule, fileTypeRule]"
+        :rules="[fileSize(1), fileType(allowedFileTypes)]"
       />
     </div>
 
@@ -140,7 +118,7 @@
         class="text-h5 text-grey800 font-weight-medium"
         flat
         type="submit"
-        :disabled="!isFormValid"
+        :disabled="!isFormValid || loading"
         :loading="loading"
       >
         Submit
@@ -152,26 +130,29 @@
 <script setup lang="ts">
 import { useRecaptcha } from '~/composables/useRecapcha'
 
+const { allowedFileTypes } = defineProps<{
+  allowedFileTypes: string[]
+}>()
+
 const emit = defineEmits<{
   (e: 'back' | 'success'): void
 }>()
 
 const { $toast } = useNuxtApp()
-const { required, emailStrict } = useValidationRules()
+const { required, emailStrict, fileSize, fileType } = useValidationRules()
 const { createTicket } = useTicket()
 const { getToken, initCaptcha, isLoaded } = useRecaptcha()
+const { user } = useUser()
+const { sanitizeTextForHtml } = useHtmlSanitizer()
 
-const allowedFileExtensions = ['zip', 'png', 'jpg', 'jpeg', 'gif', 'webp', 'svg']
 const isFormValid = ref(false)
 const loading = ref(false)
 const form = reactive<{
-  fullName: string
   email: string
   subject: string
   body: string
   file: File | File[] | null
 }>({
-  fullName: '',
   email: '',
   subject: '',
   body: '',
@@ -183,38 +164,22 @@ const back = () => {
 }
 
 const resetForm = () => {
-  form.fullName = ''
   form.email = ''
   form.subject = ''
   form.body = ''
   form.file = null
 }
 
-const getSelectedFile = () => {
-  if (Array.isArray(form.file)) {
-    return form.file[0] ?? null
+const getSelectedFile = (value: File | File[] | null = form.file) => {
+  if (Array.isArray(value)) {
+    return value[0] ?? null
   }
 
-  return form.file
-}
-
-const fileSizeRule = (value: File | File[] | null) => {
-  const file = Array.isArray(value) ? value[0] : value
-
-  return !file || file.size <= 1 * 1024 * 1024 || 'File size must be less than 1MB'
-}
-
-const fileTypeRule = (value: File | File[] | null) => {
-  const file = Array.isArray(value) ? value[0] : value
-  const extension = file?.name.split('.').pop()?.toLowerCase()
-
-  return !file
-    || (!!extension && allowedFileExtensions.includes(extension))
-    || `File type must be one of: ${allowedFileExtensions.join(', ')}`
+  return value
 }
 
 const submitTicket = async () => {
-  if (!isFormValid.value) return
+  if (!isFormValid.value || loading.value) return
 
   try {
     if (!isLoaded()) {
@@ -225,10 +190,10 @@ const submitTicket = async () => {
     const captcha = await getToken('submit')
     const response = await createTicket({
       captcha,
-      fullName: form.fullName,
+      fullName: useFullName(user.value || {}),
       email: form.email,
       subject: form.subject,
-      body: form.body,
+      body: sanitizeTextForHtml(form.body),
       file: getSelectedFile(),
     })
 

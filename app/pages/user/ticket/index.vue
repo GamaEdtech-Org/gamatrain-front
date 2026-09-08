@@ -42,6 +42,7 @@
       :max-width="560"
     >
       <user-ticket-modals-create
+        :allowed-file-types="ticketAllowedFileTypes"
         @back="showCreateModal = false"
         @success="handleTicketCreated"
       />
@@ -55,6 +56,7 @@
       <user-ticket-modals-detail
         v-if="selectedTicketId"
         :ticket-id="selectedTicketId"
+        :allowed-file-types="ticketAllowedFileTypes"
       />
     </common-modal-base>
   </div>
@@ -65,7 +67,7 @@ import type { DataTableHeader, TicketListDTO } from '@/types'
 
 definePageMeta({
   layout: 'dashboard-layout',
-  middleware: ['auth', 'user-type'],
+  middleware: ['auth'],
 })
 
 useSeoMeta({
@@ -82,9 +84,9 @@ const {
 
 const headers: DataTableHeader<TicketListDTO>[] = [
   { title: 'ID', key: 'id', sortable: false, width: '8vw' },
-  { title: 'Sender', key: 'sender', sortable: false, width: '16vw', emptyText: 'unknown' },
-  { title: 'Email', key: 'email', sortable: false, width: '20vw', emptyText: 'unknown' },
-  { title: 'Subject', key: 'subject', sortable: false, width: '24vw', align: 'start' },
+  { title: 'Sender', key: 'sender', sortable: false, width: '21vw', emptyText: 'unknown' },
+  // { title: 'Email', key: 'email', sortable: false, width: '20vw', emptyText: 'unknown' },
+  { title: 'Subject', key: 'subject', sortable: false, width: '29vw', align: 'start' },
   {
     title: 'Status',
     key: 'isReadByAdmin',
@@ -106,7 +108,7 @@ const headers: DataTableHeader<TicketListDTO>[] = [
     title: 'Created At',
     key: 'creationDate',
     sortable: false,
-    width: '38vw',
+    width: '48vw',
     type: 'date',
     dateFormat: 'DD/MM/YYYY HH:mm',
   },
@@ -132,6 +134,15 @@ const pageSizeOptions = [
   { label: '10 Rows', value: 10 },
   { label: '20 Rows', value: 20 },
   { label: '50 Rows', value: 50 },
+]
+const ticketAllowedFileTypes = [
+  'application/zip',
+  'application/x-zip-compressed',
+  'image/png',
+  'image/jpeg',
+  'image/gif',
+  'image/webp',
+  'image/svg+xml',
 ]
 const showCreateModal = ref(false)
 const showDetailModal = ref(false)

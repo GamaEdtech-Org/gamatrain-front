@@ -67,10 +67,7 @@
           <span
             class="text-h6 font-weight-bold text-grey700"
           >
-            {{ ticketDetail.fullName }} :
-          </span>
-          <span class="text-h6 text-grey500 font-weight-medium">
-            {{ ticketDetail.email }}
+            {{ ticketDetail.fullName }}
           </span>
         </div>
 
@@ -284,7 +281,7 @@
                   flat
                   color="primary"
                   size="40"
-                  :disabled="!isReplyFormValid"
+                  :disabled="!isReplyFormValid || loadingCreateReply"
                   :loading="loadingCreateReply"
                   @click="submitReply"
                 >
@@ -303,7 +300,7 @@
             ref="fileInputRef"
             v-model="replyForm.file"
             class="d-none"
-            accept=".zip,.png,.jpg,.jpeg,.gif,.webp,.svg"
+            :accept="allowedFileTypes.join(',')"
             hide-details
             @update:model-value="onFileChange"
           />
@@ -315,9 +312,11 @@
 
 <script setup lang="ts">
 import type { TicketReplyDTO } from '@/types'
+import type { VFileInput } from 'vuetify/components'
 
 const props = defineProps<{
   ticketId: number | string
+  allowedFileTypes: string[]
 }>()
 
 const emit = defineEmits<{
@@ -326,7 +325,8 @@ const emit = defineEmits<{
 
 const { $toast } = useNuxtApp()
 const { formatLocal } = useDateTime()
-const { required } = useValidationRules()
+const { required, fileSize, fileType } = useValidationRules()
+const { sanitizeTextForHtml } = useHtmlSanitizer()
 const {
   replyList,
   loadingGetItemById: loadingDetail,
@@ -337,11 +337,9 @@ const {
   createReply,
 } = useTicket()
 
-const allowedFileExtensions = ['zip', 'png', 'jpg', 'jpeg', 'gif', 'webp', 'svg']
-const maxFileSize = 1 * 1024 * 1024
 const ticketDetail = ref<Awaited<ReturnType<typeof getItemById>>['data']>(null)
 const isReplyFormValid = ref(false)
-const fileInputRef = ref<HTMLInputElement | null>(null)
+const fileInputRef = ref<InstanceType<typeof VFileInput> | null>(null)
 const filePreviewUrl = ref<string | null>(null)
 const replyForm = reactive<{
   body: string
@@ -378,25 +376,32 @@ const formatFileSize = (bytes: number) => {
 }
 
 const validateFile = (file: File) => {
-  const extension = file.name.split('.').pop()?.toLowerCase()
-  if (!extension || !allowedFileExtensions.includes(extension)) {
-    $toast.error(`File type must be one of: ${allowedFileExtensions.join(', ')}`)
+  const sizeValidationResult = fileSize(1)(file)
+  if (sizeValidationResult !== true) {
+    $toast.error(sizeValidationResult)
     return false
   }
-  if (file.size > maxFileSize) {
-    $toast.error('File size must be less than 1MB')
+
+  const typeValidationResult = fileType(props.allowedFileTypes)(file)
+  if (typeValidationResult !== true) {
+    $toast.error(typeValidationResult)
     return false
   }
+
   return true
 }
 
 const openFilePicker = () => {
-  const inputEl = fileInputRef.value as HTMLInputElement | null
+  const inputEl = fileInputRef.value?.$el?.querySelector(
+    'input[type="file"]',
+  ) as HTMLInputElement | null
+
   inputEl?.click()
 }
 
 const clearFile = () => {
   replyForm.file = null
+  revokePreview()
 }
 
 const onFileChange = (value: File | File[] | null) => {
@@ -410,6 +415,7 @@ const onFileChange = (value: File | File[] | null) => {
     }
     else {
       replyForm.file = null
+      revokePreview()
     }
   }
 }
@@ -435,9 +441,9 @@ const isUserReply = (reply: TicketReplyDTO) => {
 }
 
 const submitReply = async () => {
-  if (!isReplyFormValid.value) return
+  if (!isReplyFormValid.value || loadingCreateReply.value) return
   const response = await createReply(props.ticketId, {
-    body: replyForm.body,
+    body: sanitizeTextForHtml(replyForm.body),
     file: getSelectedFile(),
   })
 
