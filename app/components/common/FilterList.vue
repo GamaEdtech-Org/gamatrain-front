@@ -1138,12 +1138,12 @@ const clearAllFilter = async () => {
     display: grid !important;
     width: 100%;
     max-width: 1232px;
-    height: 100%;
-    min-height: 0;
-    grid-template-rows: 48px minmax(0, 1fr);
-    align-content: stretch;
+    height: auto;
+    min-height: 100%;
+    grid-template-rows: 48px auto;
+    align-content: start;
     margin: 0 auto;
-    overflow: hidden;
+    overflow: visible;
     background: #fcfcfd;
   }
 
@@ -1161,21 +1161,26 @@ const clearAllFilter = async () => {
     position: relative;
     top: auto;
     min-width: 0;
-    min-height: 0;
+    min-height: 100%;
     grid-template-columns: 240px minmax(0, 980px);
-    grid-template-rows: auto minmax(0, 1fr);
+    grid-template-rows: auto auto;
     column-gap: 12px;
     row-gap: 0;
-    align-items: stretch;
+    align-items: start;
     justify-content: stretch !important;
-    overflow: hidden;
+    overflow: visible;
     background: #fcfcfd;
   }
 
   .filter-list-sidebar-layout :deep(.services-navigation) {
+    position: sticky;
+    z-index: 4;
+    top: 8px;
     grid-column: 2;
     grid-row: 1;
     max-width: none;
+    background: #fcfcfd;
+    box-shadow: 0 -8px 0 #ffffff;
   }
 
   .filter-list-sidebar-layout :deep(.services-navigation__items) {
@@ -1184,13 +1189,16 @@ const clearAllFilter = async () => {
   }
 
   .filter-list-sidebar-layout .desktop-filter-controls-shell {
+    position: sticky;
+    z-index: 5;
+    top: 8px;
     grid-column: 1;
     grid-row: 1 / span 2;
     min-width: 0;
     min-height: 0;
-    max-height: 100%;
+    max-height: calc(100dvh - 16px);
     align-items: stretch;
-    align-self: stretch;
+    align-self: start;
     overflow-x: hidden;
     overflow-y: auto;
     overscroll-behavior: contain;
@@ -1370,12 +1378,9 @@ const clearAllFilter = async () => {
     grid-column: 2;
     grid-row: 2;
     min-width: 0;
-    min-height: 0;
+    min-height: 100vh;
     padding: 12px;
-    overflow-x: hidden;
-    overflow-y: auto;
-    overscroll-behavior: contain;
-    scrollbar-gutter: stable;
+    overflow: visible;
     background: transparent;
     border: 1px solid #d8dee8;
     border-radius: 12px;

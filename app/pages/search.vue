@@ -1083,20 +1083,20 @@ onMounted(() => {
   .margin-top-handle {
     width: 100%;
     max-width: none !important;
-    height: calc(100dvh - 64px);
-    min-height: 0;
+    height: auto;
+    min-height: calc(100dvh - 64px);
     padding: 16px 24px;
-    overflow: hidden;
+    overflow: visible;
   }
 
   .margin-top-handle > .v-row {
-    height: 100%;
+    height: auto;
     margin: 0;
-    align-content: stretch;
+    align-content: flex-start;
   }
 
   .top-info-div {
-    height: 100%;
+    height: auto;
   }
 
   .search-results-heading {
