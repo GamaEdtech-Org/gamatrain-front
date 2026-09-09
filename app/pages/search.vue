@@ -643,7 +643,10 @@ const filters = computed(() => {
       queryKey: 'test_type',
       inlineOptions: true,
       inlineAllowClear: true,
-      inlineItemsPerRow: 4,
+      inlineItemsPerRow: filterState =>
+        filterState[index.board]?.selectedItem?.title?.trim() === 'Edexcel'
+          ? 2
+          : 4,
       itemTitle: (item) => {
         const match = item.title?.match(/^\s*paper\s+(\d+)\s*$/i)
         return match ? match[1] : item.title

@@ -37,7 +37,10 @@
           :key="item.id"
           variant="outlined"
           class="inline-filter-option"
-          :class="{ 'inline-filter-option-selected': selectedItem?.id == item.id }"
+          :class="{
+            'inline-filter-option-selected': selectedItem?.id == item.id,
+            'inline-filter-option-multi-digit': isMultiDigitPaperOption(item),
+          }"
           :style="inlineGrouped
             ? {
               gridColumn: (itemIndex % inlineItemsPerRow) + (inlineAllowClear ? 2 : 1),
@@ -47,7 +50,7 @@
           :disabled="disabled"
           @click="onFilterUpdate(item)"
         >
-          {{ itemTitle?.(item) || item.title }}
+          {{ getInlineItemTitle(item) }}
         </v-btn>
       </div>
     </div>
@@ -359,6 +362,10 @@ watch(
 )
 
 const getIconSrc = item => props.iconSrc?.(item) || item.icon
+const getInlineItemTitle = item => props.itemTitle?.(item) || item.title
+const isMultiDigitPaperOption = item =>
+  props.title === 'Paper'
+  && /^\d{2,}$/.test(String(getInlineItemTitle(item)).trim())
 
 const onFilterUpdate = (itemSelected) => {
   isShowSelectModal.value = false
@@ -716,6 +723,10 @@ defineExpose({
   background: #fcfcfd;
   border-color: #d8dee8 !important;
   transition: background-color 160ms ease, border-color 160ms ease, box-shadow 160ms ease;
+}
+
+.inline-filter-option-multi-digit {
+  padding-inline: 8px !important;
 }
 
 .inline-filter-option-selected {

@@ -215,7 +215,7 @@
                   :inline-options="true"
                   :inline-allow-clear="entry.filter.inlineAllowClear"
                   :inline-grouped="true"
-                  :inline-items-per-row="entry.filter.inlineItemsPerRow"
+                  :inline-items-per-row="resolveInlineItemsPerRow(entry.filter)"
                   :inline-divider-after="inlineIndex === 0 && inlineFilterEntries.length > 1"
                   :inline-leading-option-slots="entry.filter.inlineLeadingOptionSlots"
                   :item-title="entry.filter.itemTitle"
@@ -485,6 +485,10 @@ const filters = ref(
     initialDisabled: filter.disabled,
   })),
 )
+const resolveInlineItemsPerRow = filter =>
+  typeof filter.inlineItemsPerRow === 'function'
+    ? filter.inlineItemsPerRow(filters.value)
+    : filter.inlineItemsPerRow
 const dialogFilterMobileModel = ref(false)
 const countFilterSelect = ref(Object.keys(route.query).length)
 const textSearch = ref(route.query.title ? route.query.title : '')
@@ -1377,6 +1381,10 @@ const clearAllFilter = async () => {
     border-radius: 8px !important;
     font-size: 12px;
     line-height: 18px;
+  }
+
+  .filter-list-sidebar-layout :deep(.inline-filter-option.inline-filter-option-multi-digit) {
+    padding-inline: 4px !important;
   }
 
   .filter-list-sidebar-layout .search-results-scroll-region {

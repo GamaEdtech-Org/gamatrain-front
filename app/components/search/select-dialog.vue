@@ -1,15 +1,15 @@
 <template>
   <v-dialog
     v-model="dialogModel"
-    max-width="400"
+    max-width="440"
     :fullscreen="!mdAndUp"
     @click="clickOnOverlay"
   >
     <div
-      class="select-dialog-panel w-100 d-flex flex-wrap flex-column bg-white pa-6 mobile-style"
+      class="select-dialog-panel w-100 d-flex flex-column bg-white pa-0 mobile-style"
       @click="clickOnModal"
     >
-      <v-row>
+      <v-row class="select-dialog-header">
         <v-col cols="6">
           <span class="select-dialog-title">{{ titleModal }}</span>
         </v-col>
@@ -33,8 +33,13 @@
           </template>
           <v-icon
             class="select-dialog-close ml-4"
-            size="x-large"
+            size="20"
+            role="button"
+            tabindex="0"
+            aria-label="Close dialog"
             @click="closeModal"
+            @keydown.enter.stop.prevent="closeModal"
+            @keydown.space.stop.prevent="closeModal"
           >
             md:cancel
           </v-icon>
@@ -42,7 +47,7 @@
       </v-row>
       <v-row
         v-if="hasSearch"
-        class="pl-2 pr-2 mt-6"
+        class="select-dialog-search-row"
       >
         <v-text-field
           v-model="searchText"
@@ -50,18 +55,20 @@
           prepend-inner-icon="md:search"
           glow
           variant="outlined"
-          color="#F2C94C"
-          icon-color="#171633"
+          color="#F4B400"
+          icon-color="#1E2A44"
           density="compact"
-          rounded="xl"
+          rounded="lg"
+          hide-details
+          class="select-dialog-search"
         >
           <template #append-inner>
             <v-btn
-              class="mr-n3"
-              color="#F2C94C"
-              width="70"
-              height="30"
-              rounded="xl"
+              class="select-dialog-search-button mr-n2"
+              color="#F4B400"
+              width="64"
+              height="32"
+              rounded="lg"
             >
               Search
             </v-btn>
@@ -70,6 +77,7 @@
       </v-row>
       <v-list
         v-if="!isLoading"
+        class="select-dialog-list"
         max-height="320"
       >
         <v-list-item
@@ -77,7 +85,12 @@
           :key="item.title"
           :value="item.title"
           :active="item.id == selectedItem?.id"
-          color="#F2C94C"
+          color="#1E2A44"
+          class="select-dialog-item"
+          :class="{
+            'select-dialog-item--main-topic': titleModal === 'Topic' && item.season,
+            'select-dialog-item--subtopic': titleModal === 'Topic' && !item.season,
+          }"
           @click="changeSelectedItem(item)"
         >
           <template #prepend>
@@ -107,7 +120,7 @@
               <v-icon
                 v-else
                 size="34"
-                color="grey500"
+                color="#1E2A44"
               >{{ fallbackIcon }}</v-icon>
             </span>
             <v-avatar
@@ -133,21 +146,21 @@
 
       <div
         v-if="isLoading"
-        class="text-center pt-8"
+        class="select-dialog-loading text-center"
       >
         <v-progress-circular
           indeterminate
           :width="3"
-          color="#F2C94C"
+          color="#F4B400"
         />
       </div>
 
       <v-alert
         v-if="searchText && filteredItems.length === 0 && !isLoading"
         type="info"
-        color="#F2C94C"
+        color="#1E2A44"
         density="compact"
-        class="mb-4"
+        class="select-dialog-empty"
         variant="tonal"
       >
         No {{ titleModal }} found matching "{{ searchText }}". Try a different
@@ -158,9 +171,9 @@
           searchText.length == 0 && filteredItems.length === 0 && !isLoading
         "
         type="info"
-        color="#F2C94C"
+        color="#1E2A44"
         density="compact"
-        class="mb-4"
+        class="select-dialog-empty"
         variant="tonal"
       >
         No {{ titleModal }} found.
@@ -206,7 +219,7 @@ const HighlightedText = defineComponent({
             'span',
             {
               style: part.highlight
-                ? 'background-color: #FFB600; color: white;'
+                ? 'background-color: #FFF8E1; color: #1E2A44;'
                 : '',
             },
             part.text,
@@ -329,26 +342,69 @@ const clickOnModal = (event) => {
 
 <style scoped>
 .select-dialog-panel {
-  color: #202238;
-  border: 1px solid #dcdde5;
+  max-height: min(82vh, 680px);
+  overflow: hidden;
+  color: #1e2a44;
+  background: #fcfcfd !important;
+  border: 1px solid #d8dee8;
   border-radius: 16px;
-  box-shadow: 0 12px 32px rgb(36 41 47 / 18%);
+  box-shadow: 0 20px 48px rgb(30 42 68 / 16%);
+}
+
+.select-dialog-header {
+  width: 100%;
+  min-height: 64px;
+  align-items: center;
+  padding: 16px 20px;
+  margin: 0 !important;
+  border-bottom: 1px solid #d8dee8;
+}
+
+.select-dialog-header > .v-col {
+  padding: 0;
 }
 
 .select-dialog-title {
-  color: #202238;
-  font-size: 20px;
+  color: #1e2a44;
+  font-size: 18px;
   font-weight: 700;
-  line-height: 28px;
+  line-height: 24px;
 }
 
 .select-dialog-close {
-  color: #65697a;
+  box-sizing: border-box;
+  display: inline-flex;
+  width: 32px;
+  height: 32px;
+  flex: 0 0 32px;
+  align-items: center;
+  justify-content: center;
+  margin-left: 8px !important;
+  color: #667085;
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: 8px;
   cursor: pointer;
+  transition:
+    color 160ms ease,
+    background-color 160ms ease,
+    border-color 160ms ease,
+    transform 160ms ease;
 }
 
 .select-dialog-close:hover {
   color: #c93c37;
+  background: #f7f8fa;
+  border-color: #d8dee8;
+}
+
+.select-dialog-close:active {
+  transform: scale(0.96);
+}
+
+.select-dialog-close:focus-visible {
+  outline: 3px solid rgb(244 180 0 / 28%);
+  outline-offset: 2px;
 }
 
 .select-dialog-result-count {
@@ -359,17 +415,145 @@ const clickOnModal = (event) => {
 }
 
 .select-dialog-result-count__number {
-  color: #202238;
-  font-size: 18px;
+  color: #1e2a44;
+  font-size: 16px;
   font-weight: 700;
-  line-height: 24px;
+  line-height: 20px;
 }
 
 .select-dialog-result-count__label {
-  color: #65697a;
-  font-size: 13px;
+  color: #667085;
+  font-size: 12px;
   font-weight: 500;
-  line-height: 20px;
+  line-height: 18px;
+}
+
+.select-dialog-search-row {
+  width: 100%;
+  padding: 16px 24px 8px;
+  margin: 0 !important;
+}
+
+.select-dialog-search {
+  width: 100%;
+}
+
+.select-dialog-search :deep(.v-field) {
+  min-height: 44px;
+  color: #1e2a44;
+  background: #ffffff;
+  border-radius: 12px !important;
+  box-shadow: none;
+}
+
+.select-dialog-search :deep(.v-field__outline) {
+  color: #d8dee8;
+  --v-field-border-opacity: 1;
+}
+
+.select-dialog-search :deep(.v-field.v-field--focused .v-field__outline) {
+  color: #f4b400;
+}
+
+.select-dialog-search :deep(.v-field__prepend-inner),
+.select-dialog-search :deep(.v-field__input),
+.select-dialog-search :deep(.v-label) {
+  color: #1e2a44;
+}
+
+.select-dialog-search-button {
+  color: #1e2a44 !important;
+  background: #f4b400 !important;
+  font-size: 12px;
+  font-weight: 650;
+  letter-spacing: 0;
+  text-transform: none;
+  box-shadow: none;
+}
+
+.select-dialog-search-button:hover {
+  background: #e8a800 !important;
+}
+
+.select-dialog-list {
+  width: 100%;
+  min-height: 0;
+  padding: 8px 24px 16px;
+  overflow-y: auto;
+  background: transparent;
+}
+
+.select-dialog-list :deep(.select-dialog-item) {
+  min-height: 48px;
+  padding: 6px 12px;
+  margin: 0;
+  color: #1e2a44;
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: 12px;
+  transition:
+    color 160ms ease,
+    background-color 160ms ease,
+    border-color 160ms ease,
+    box-shadow 160ms ease;
+}
+
+.select-dialog-list :deep(.select-dialog-item:hover) {
+  background: #f7f8fa;
+  border-color: #d8dee8;
+}
+
+.select-dialog-list :deep(.select-dialog-item.v-list-item--active) {
+  color: #1e2a44 !important;
+  background: #eef1f5 !important;
+  border-color: #d8dee8;
+  box-shadow: 0 1px 2px rgb(30 42 68 / 8%);
+}
+
+.select-dialog-list :deep(.select-dialog-item:not(:last-child)) {
+  border-bottom: 1px solid #eef1f5;
+}
+
+.select-dialog-list :deep(.select-dialog-item .v-list-item__overlay) {
+  opacity: 0 !important;
+}
+
+.select-dialog-list :deep(.select-dialog-item .v-list-item-title) {
+  overflow: hidden;
+  font-size: 15px !important;
+  font-weight: 500;
+  line-height: 22px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.select-dialog-list :deep(.select-dialog-item.v-list-item--active .v-list-item-title) {
+  font-weight: 500;
+}
+
+.select-dialog-list :deep(.select-dialog-item--main-topic .v-list-item-title) {
+  font-weight: 600;
+}
+
+.select-dialog-list :deep(.select-dialog-item--subtopic) {
+  padding-left: 27px;
+}
+
+.select-dialog-list :deep(.v-list-item__prepend > .v-list-item__spacer) {
+  width: 12px;
+}
+
+.select-dialog-loading {
+  min-height: 128px;
+  padding: 40px 20px;
+}
+
+.select-dialog-empty {
+  margin: 8px 20px 20px;
+  color: #1e2a44;
+  background: #f7f8fa !important;
+  border: 1px solid #d8dee8;
+  border-radius: 12px;
 }
 
 .size-icon {
@@ -398,11 +582,37 @@ const clickOnModal = (event) => {
   width: 100%;
   height: 100%;
 }
+
+@media (prefers-reduced-motion: reduce) {
+  .select-dialog-close,
+  .select-dialog-list :deep(.select-dialog-item) {
+    transition: none;
+  }
+}
+
 @media only screen and (max-width: 960px) {
   .mobile-style {
     position: absolute;
     bottom: 0;
-    border-radius: 24px 24px 0 0 !important;
+    max-height: 92dvh;
+    border-radius: 20px 20px 0 0 !important;
+  }
+
+  .select-dialog-header {
+    padding: 16px;
+  }
+
+  .select-dialog-search-row {
+    padding: 16px 24px 8px;
+  }
+
+  .select-dialog-list {
+    max-height: calc(92dvh - 144px) !important;
+    padding-inline: 24px;
+  }
+
+  .select-dialog-empty {
+    margin-inline: 16px;
   }
 }
 </style>
