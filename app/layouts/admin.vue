@@ -94,6 +94,11 @@ const menuItems = [
         icon: 'md:reset_image_outlined',
       },
       {
+        title: 'Issues',
+        link: '/admin/schools/issues',
+        icon: 'md:report_outlined',
+      },
+      {
         title: 'Comments ',
         link: '/admin/schools/comments',
         icon: 'md:comment_outlined',
