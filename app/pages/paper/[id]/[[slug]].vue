@@ -254,43 +254,43 @@ const CAMBRIDGE_SESSION_MAP: Record<
   Record<string, { display: string, code: string }>
 > = {
   22: {
-    3: { display: 'Feb March', code: 'F/M' },
+    3: { display: 'February March', code: 'F/M' },
     6: { display: 'May June', code: 'M/J' },
-    11: { display: 'Oct Nov', code: 'O/N' },
+    11: { display: 'October November', code: 'O/N' },
   },
   4161: {
-    3: { display: 'Feb March', code: 'F/M' },
+    3: { display: 'February March', code: 'F/M' },
     6: { display: 'May June', code: 'M/J' },
-    11: { display: 'Oct Nov', code: 'O/N' },
+    11: { display: 'October November', code: 'O/N' },
   },
   6535: {
-    3: { display: 'Feb March', code: 'F/M' },
+    3: { display: 'February March', code: 'F/M' },
     6: { display: 'May June', code: 'M/J' },
-    11: { display: 'Oct Nov', code: 'O/N' },
+    11: { display: 'October November', code: 'O/N' },
   },
   23: {
     6: { display: 'May June', code: 'M/J' },
-    11: { display: 'Oct Nov', code: 'O/N' },
+    11: { display: 'October November', code: 'O/N' },
   },
   6374: {
     6: { display: 'May June', code: 'M/J' },
-    11: { display: 'Oct Nov', code: 'O/N' },
+    11: { display: 'October November', code: 'O/N' },
   },
   6533: {
     6: { display: 'May June', code: 'M/J' },
-    11: { display: 'Oct Nov', code: 'O/N' },
+    11: { display: 'October November', code: 'O/N' },
   },
   6635: {
-    3: { display: 'Feb March', code: 'F/M' },
+    3: { display: 'February March', code: 'F/M' },
     4: { display: 'April May', code: 'A/M' },
     5: { display: 'April May', code: 'A/M' },
-    10: { display: 'Oct Nov', code: 'O/N' },
+    10: { display: 'October November', code: 'O/N' },
   },
   6639: {
-    3: { display: 'Feb March', code: 'F/M' },
+    3: { display: 'February March', code: 'F/M' },
     4: { display: 'April May', code: 'A/M' },
     5: { display: 'April May', code: 'A/M' },
-    10: { display: 'Oct Nov', code: 'O/N' },
+    10: { display: 'October November', code: 'O/N' },
   },
 }
 
@@ -424,6 +424,9 @@ const setMetaData = () => {
           ? `${paperNumber}${normalizedVariantTitle}`
           : paperNumber.padStart(2, '0')
         const shortYear = normalizedYear.slice(-2)
+
+        pageTitle.value = `${pageTitle.value} ${subjectCode}/${paperVariantCode}/${session.code}/${shortYear}`
+
         const currentCambridgeDescription = `Download Cambridge ${gradeTitle} ${subjectName} ${subjectCode}/${paperVariantCode} ${session.display} ${normalizedYear} question paper(QP) with mark scheme (MS) pdf. Access paper ${paperNumber}, ${subjectCode}/${paperVariantCode}/${session.code}/${shortYear} question paper pdf with answers for your upcoming exam series preparation.`
 
         pageDescribe.value = currentCambridgeDescription
