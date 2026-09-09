@@ -1289,17 +1289,14 @@ const clearAllFilter = async () => {
 
   .filter-list-sidebar-layout :deep(.search-filter-control.open-style-btn) {
     background: #fcfcfd;
-    border-bottom-color: #1e2a44 !important;
   }
 
   .filter-list-sidebar-layout :deep(.search-filter-control.open-style-btn:not(.search-filter-empty)) {
     background: #d8dee8;
-    border-bottom-color: transparent !important;
   }
 
   .filter-list-sidebar-layout :deep(.search-filter-control.dependent-selected-btn) {
     background: #d8dee8;
-    border-bottom-color: transparent !important;
   }
 
   .filter-list-sidebar-layout :deep(.search-filter-value) {
@@ -1309,7 +1306,6 @@ const clearAllFilter = async () => {
   .filter-list-sidebar-layout .inline-filter-group-wrapper {
     display: block;
     max-width: none;
-    border-top: 1px solid #d8dee8;
   }
 
   .filter-list-sidebar-layout :deep(.inline-filter-group) {
@@ -1334,11 +1330,21 @@ const clearAllFilter = async () => {
   }
 
   .filter-list-sidebar-layout :deep(.inline-filter-group > .inline-filter-grouped-row + .inline-filter-grouped-row) {
+    position: relative;
     padding-top: 12px;
     padding-left: 0;
     margin-top: 0;
-    border-top: 1px solid #eef1f5;
     border-left: 0;
+  }
+
+  .filter-list-sidebar-layout :deep(.inline-filter-group > .inline-filter-grouped-row + .inline-filter-grouped-row::before) {
+    position: absolute;
+    top: 0;
+    right: -16px;
+    left: -16px;
+    border-top: 1px solid #eef1f5;
+    content: '';
+    pointer-events: none;
   }
 
   .filter-list-sidebar-layout :deep(.inline-filter-grouped-row .inline-filter-row-content) {

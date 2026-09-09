@@ -27,26 +27,11 @@
               <CommonDetailSubjectDirectoryNav :content-data="data[0]" />
             </div>
           </template>
-          <template #results-heading="{ count, loading: headingLoading }">
+          <template #results-heading>
             <div class="search-results-heading w-100 d-flex flex-wrap align-center justify-space-between ga-4">
               <h1 class="search-results-title">
               {{ metadata.title }}
               </h1>
-              <div class="search-results-count d-flex align-center ga-2 flex-shrink-0">
-                <v-skeleton-loader
-                  v-if="headingLoading"
-                  width="100"
-                  height="24"
-                  class="rounded-lg"
-                />
-                <template v-else>
-                  <span
-                    v-if="Number(count) > 0"
-                    class="search-results-count-number"
-                  >{{ $numberFormat(count) }}</span>
-                  <span class="search-results-count-label">{{ getResultLabel(count) }}</span>
-                </template>
-              </div>
             </div>
           </template>
           <search-list
@@ -79,7 +64,7 @@
               <v-icon color="#1E2A44">
                 md:add
               </v-icon>
-              Add
+              Publish
             </v-btn>
           </div>
         </CommonFilterList>
@@ -95,12 +80,6 @@ import { useRoute } from 'vue-router'
 
 const route = useRoute()
 const router = useRouter()
-
-const getResultLabel = (count) => {
-  const resultCount = Number(count) || 0
-  if (resultCount === 0) return 'No Result'
-  return resultCount === 1 ? 'Result' : 'Results'
-}
 
 const getEquivalentNewType = (type) => {
   switch (type) {
@@ -224,6 +203,10 @@ const data = ref([])
 const isAllDataLoaded = ref(false)
 const totalDataFind = ref(0)
 const serviceResultCounts = ref({})
+const appliedFilterTitles = ref({
+  query: {},
+  titles: {},
+})
 let serviceCountRequestId = 0
 const perPage = 10
 const perPageServerSide = 5
@@ -714,7 +697,14 @@ const scrollToPageTop = async () => {
   await new Promise(resolve => requestAnimationFrame(resolve))
 }
 
-const changeFilter = async (query, _titles, context = {}) => {
+const changeFilter = async (query, titles, context = {}) => {
+  if (titles !== undefined) {
+    appliedFilterTitles.value = {
+      query: { ...query },
+      titles: { ...titles },
+    }
+  }
+
   lastRequestedService.value = getEquivalentNewType(query.type)
   isAllDataLoaded.value = false
   isInitialDataLoading.value = true
@@ -747,6 +737,14 @@ watch(activeService, async (service) => {
 const metadata = computed(() => {
   const { section, base, lesson, test_type, edu_year, edu_month } = route.query
   const firstElement = data.value[0]
+  const getAppliedFilterTitle = (queryKey) => {
+    const appliedQueryValue = appliedFilterTitles.value.query[queryKey]
+    const currentQueryValue = route.query[queryKey]
+
+    return String(appliedQueryValue ?? '') === String(currentQueryValue ?? '')
+      ? appliedFilterTitles.value.titles[queryKey]
+      : undefined
+  }
 
   let monthTitle = edu_month
     ? dayjs()
@@ -764,25 +762,29 @@ const metadata = computed(() => {
   }
 
   const titles = {
-    boardTitle:
-      section && firstElement ? firstElement.section_title : undefined,
-    gradeTitle: section && base && firstElement ? firstElement.base_title : '',
+    boardTitle: section
+      ? getAppliedFilterTitle('section') || firstElement?.section_title
+      : undefined,
+    gradeTitle: section && base
+      ? getAppliedFilterTitle('base') || firstElement?.base_title || ''
+      : '',
     subjectTitle:
-      section && base && lesson && firstElement
-        ? firstElement.lesson_title
+      section && base && lesson
+        ? getAppliedFilterTitle('lesson') || firstElement?.lesson_title || ''
         : '',
     classificationTitle: '',
     yearTitle: edu_year ? edu_year : '',
     monthTitle: monthTitle,
-    is_paper: firstElement?.is_paper,
+    is_paper: firstElement?.is_paper ?? activeService.value === 'paper',
   }
 
   if (
     (getEquivalentOldType(route.query.type) == 'test' || getEquivalentOldType(route.query.type) == 'azmoon')
     && test_type
   ) {
-    titles.classificationTitle
-      = firstElement?.test_type_title || firstElement?.azmoon_type_title
+    titles.classificationTitle = getAppliedFilterTitle('test_type')
+      || firstElement?.test_type_title
+      || firstElement?.azmoon_type_title
   }
 
   const joinTextTitles = `${titles.boardTitle} ${titles.gradeTitle} ${titles.subjectTitle} ${titles.classificationTitle} ${titles.monthTitle} ${titles.yearTitle}`
@@ -1066,19 +1068,6 @@ onMounted(() => {
   line-height: 30px;
   text-align: left;
 }
-.search-results-count-number {
-  color: #1e2a44;
-  font-size: 22px;
-  font-weight: 700;
-  line-height: 30px;
-}
-.search-results-count-label {
-  color: rgb(30 42 68 / 68%);
-  font-size: 14px;
-  font-weight: 500;
-  line-height: 20px;
-}
-
 @media (min-width: 960px) {
   .margin-top-handle {
     width: 100%;
