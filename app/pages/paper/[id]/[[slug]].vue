@@ -164,7 +164,7 @@
 
 <script setup lang="ts">
 import type { ApiResult, PastPaperDTO, FilesDTO, AppError } from '@/types'
-import { DEFAULT_BOARD_ID } from '@/constants'
+import { CAMBRIDGE_BOARD_ID } from '@/constants'
 
 interface BreadCrumb {
   text: string
@@ -322,11 +322,10 @@ const getCambridgeFilenameSessionCode = (seoSessionCode: string) =>
   CAMBRIDGE_FILENAME_SESSION_CODES[seoSessionCode]
 
 const getCambridgeAvailableFiles = (
-  files: FilesDTO | undefined,
+  files: FilesDTO,
   filenamePrefix: string,
   paperVariantCode: string,
 ) => {
-  if (!files?.pdf || !files.answer) return null
 
   const availableFiles: string[] = []
 
@@ -399,7 +398,7 @@ const setMetaData = () => {
     pageTitle.value = `${baseTitle} past paper`
     pageDescribe.value = `Download ${baseTitle} past paper with mark scheme (MS). Access a full collection of past papers for study, revision, and exam practice.`
 
-    if (String(section) === String(DEFAULT_BOARD_ID)) {
+    if (String(section) === String(CAMBRIDGE_BOARD_ID)) {
       const subjectMatch = lesson_title
         ?.trim()
         .match(/^(.+?)\s*\((\d{4})\)$/)
