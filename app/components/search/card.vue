@@ -46,13 +46,25 @@
             class="card-indicators d-none d-md-flex align-center flex-shrink-0"
             aria-label="Resource information"
           >
-            <DifficultyIndicator :level="information.level" :size="16" />
-            <span class="indicator indicator-library" title="Resource available">
+            <DifficultyIndicator v-if="!information.is_paper" :level="information.level" :size="16" />
+            <span
+              v-if="hasAnswersAtEndOfFiles"
+              class="indicator indicator-library"
+              title="Resource available"
+            >
               <img :src="libraryCheckIcon" alt="" class="status-icon">
             </span>
             <span
-              class="indicator indicator-pdf"
+              v-if="information.is_paper"
+              class="indicator indicator-solved-paper"
               :class="{ 'indicator-muted': !information.q_file }"
+              title="Solved paper availability"
+            >
+              <img :src="solvedPaperIcon" alt="" class="status-icon">
+            </span>
+            <span
+              class="indicator indicator-pdf"
+              :class="{ 'indicator-muted': !hasPdfAvailable }"
               title="PDF availability"
             >
               <img :src="pdfCardIcon" alt="" class="status-icon">
@@ -64,10 +76,10 @@
             >
               <img :src="wordCardIcon" alt="" class="status-icon">
             </span>
-            <span class="indicator indicator-fire" title="Featured resource">
+            <span v-if="!information.is_paper" class="indicator indicator-fire" title="Featured resource">
               <img :src="fireCardIcon" alt="" class="status-icon">
             </span>
-            <QualityIndicator :score="qualityScore" :size="16" />
+            <QualityIndicator v-if="!information.is_paper" :score="qualityScore" :size="16" />
           </div>
         </div>
 
@@ -168,12 +180,22 @@
         </div>
 
         <div class="card-indicators mobile-indicators d-flex d-md-none align-center">
-          <DifficultyIndicator :level="information.level" :size="16" />
-          <span class="indicator indicator-library"><img :src="libraryCheckIcon" alt="" class="status-icon"></span>
-          <span class="indicator indicator-pdf" :class="{ 'indicator-muted': !information.q_file }"><img :src="pdfCardIcon" alt="" class="status-icon"></span>
+          <DifficultyIndicator v-if="!information.is_paper" :level="information.level" :size="16" />
+          <span
+            v-if="hasAnswersAtEndOfFiles"
+            class="indicator indicator-library"
+            title="Resource available"
+          ><img :src="libraryCheckIcon" alt="" class="status-icon"></span>
+          <span
+            v-if="information.is_paper"
+            class="indicator indicator-solved-paper"
+            :class="{ 'indicator-muted': !information.q_file }"
+            title="Solved paper availability"
+          ><img :src="solvedPaperIcon" alt="" class="status-icon"></span>
+          <span class="indicator indicator-pdf" :class="{ 'indicator-muted': !hasPdfAvailable }"><img :src="pdfCardIcon" alt="" class="status-icon"></span>
           <span class="indicator indicator-word" :class="{ 'indicator-muted': !information.q_file_word }"><img :src="wordCardIcon" alt="" class="status-icon"></span>
-          <span class="indicator indicator-fire"><img :src="fireCardIcon" alt="" class="status-icon"></span>
-          <QualityIndicator :score="qualityScore" :size="16" />
+          <span v-if="!information.is_paper" class="indicator indicator-fire"><img :src="fireCardIcon" alt="" class="status-icon"></span>
+          <QualityIndicator v-if="!information.is_paper" :score="qualityScore" :size="16" />
         </div>
       </div>
     </div>
@@ -181,13 +203,14 @@
 </template>
 
 <script setup>
-import { computed } from 'vue'
+import { computed, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import DifficultyIndicator from './DifficultyIndicator.vue'
 import QualityIndicator from './QualityIndicator.vue'
 import fireCardIcon from '~/assets/images/search-card/fire.svg'
 import libraryCheckIcon from '~/assets/images/search-card/library-check.svg'
 import pdfCardIcon from '~/assets/images/search-card/pdf.svg'
+import solvedPaperIcon from '~/assets/images/search-card/solved-paper.svg'
 import wordCardIcon from '~/assets/images/search-card/word.svg'
 
 const route = useRoute()
@@ -238,6 +261,9 @@ const formattedDate = computed(() => {
   return Number.isNaN(date.getTime()) ? props.information.subdate : date.toLocaleDateString()
 })
 
+const hasAnswersAtEndOfFiles = ref(false)
+let answerAvailabilityRequestId = 0
+
 const getEquivalentOldType = (type) => {
   switch (type) {
     case 'paper':
@@ -264,6 +290,58 @@ const getEquivalentOldType = (type) => {
       return 'test'
   }
 }
+
+const hasPdfAvailable = computed(() =>
+  getEquivalentOldType(route.query.type) === 'azmoon'
+  || Boolean(props.information.q_file),
+)
+
+const matchesAnswerAvailabilityNotice = information =>
+  !information?.is_paper
+  && (String(information?.answer_type) === '1'
+    || String(information?.answer_type) === '2')
+  && !information?.files?.answer?.exist
+
+const resolveAnswerAvailability = async () => {
+  const requestId = ++answerAvailabilityRequestId
+  const information = props.information
+  hasAnswersAtEndOfFiles.value = false
+
+  if (getEquivalentOldType(route.query.type) !== 'test' || !information?.id)
+    return
+
+  if (information.is_paper) return
+
+  if (information.answer_type != null && information.files?.answer) {
+    hasAnswersAtEndOfFiles.value = matchesAnswerAvailabilityNotice(information)
+    return
+  }
+
+  // A separate answer file cannot satisfy the detail page's notice condition.
+  if (information.a_file) return
+  if (import.meta.server) return
+
+  try {
+    const response = await useApiService.get(
+      `/api/v1/tests/${information.id}`,
+      undefined,
+      { public: true },
+    )
+
+    if (requestId !== answerAvailabilityRequestId) return
+    hasAnswersAtEndOfFiles.value = matchesAnswerAvailabilityNotice(response?.data)
+  }
+  catch {
+    if (requestId === answerAvailabilityRequestId)
+      hasAnswersAtEndOfFiles.value = false
+  }
+}
+
+watch(
+  [() => props.information.id, () => route.query.type],
+  resolveAnswerAvailability,
+  { immediate: true },
+)
 
 const createLinkCard = (information) => {
   let idType = ''
@@ -440,6 +518,11 @@ const openCard = (event) => {
   height: 16px;
   align-items: center;
   justify-content: center;
+}
+
+.indicator-solved-paper {
+  width: 16px;
+  height: 16px;
 }
 
 .status-icon {
