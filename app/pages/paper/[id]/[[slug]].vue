@@ -163,8 +163,7 @@
 </template>
 
 <script setup lang="ts">
-import type { ApiResult, PastPaperDTO, FilesDTO, AppError } from '@/types'
-import { CAMBRIDGE_BOARD_ID } from '@/constants'
+import type { ApiResult, PastPaperDTO, AppError } from '@/types'
 
 interface BreadCrumb {
   text: string
@@ -176,6 +175,7 @@ const route = useRoute()
 const router = useRouter()
 const { user } = useUser()
 const { isAuthenticated } = useAuth()
+const { buildCambridgeMeta } = useCambridgeSeo()
 
 const { buildSchema } = useSeoSchema()
 
@@ -249,138 +249,13 @@ const schema = computed(() => {
   })
 })
 
-const CAMBRIDGE_SESSION_MAP: Record<
-  string,
-  Record<string, { display: string, code: string }>
-> = {
-  22: {
-    3: { display: 'February March', code: 'F/M' },
-    6: { display: 'May June', code: 'M/J' },
-    11: { display: 'October November', code: 'O/N' },
-  },
-  4161: {
-    3: { display: 'February March', code: 'F/M' },
-    6: { display: 'May June', code: 'M/J' },
-    11: { display: 'October November', code: 'O/N' },
-  },
-  6535: {
-    3: { display: 'February March', code: 'F/M' },
-    6: { display: 'May June', code: 'M/J' },
-    11: { display: 'October November', code: 'O/N' },
-  },
-  23: {
-    6: { display: 'May June', code: 'M/J' },
-    11: { display: 'October November', code: 'O/N' },
-  },
-  6374: {
-    6: { display: 'May June', code: 'M/J' },
-    11: { display: 'October November', code: 'O/N' },
-  },
-  6533: {
-    6: { display: 'May June', code: 'M/J' },
-    11: { display: 'October November', code: 'O/N' },
-  },
-  6635: {
-    3: { display: 'February March', code: 'F/M' },
-    4: { display: 'April May', code: 'A/M' },
-    5: { display: 'April May', code: 'A/M' },
-    10: { display: 'October November', code: 'O/N' },
-  },
-  6639: {
-    3: { display: 'February March', code: 'F/M' },
-    4: { display: 'April May', code: 'A/M' },
-    5: { display: 'April May', code: 'A/M' },
-    10: { display: 'October November', code: 'O/N' },
-  },
-}
-
-interface CambridgeFileType {
-  code: string
-  label: string
-}
-
-const CAMBRIDGE_FILENAME_SESSION_CODES: Record<string, string> = {
-  'M/J': 's',
-  'A/M': 's',
-  'O/N': 'w',
-  'F/M': 'm',
-}
-
-const CAMBRIDGE_EXTRA_FILE_TYPES: Record<string, CambridgeFileType> = {
-  'insert': { code: 'in', label: 'insert' },
-  'audio file': { code: 'sf', label: 'sound file (SF)' },
-  'confidential instructions': { code: 'ci', label: 'confidential instructions' },
-  'confidental instructions': { code: 'ci', label: 'confidential instructions' },
-  "teacher's notes": { code: 'tn', label: "teacher's notes" },
-  'teacher notes': { code: 'tn', label: "teacher's notes" },
-  'transcript': { code: 'qr', label: 'transcript (QR)' },
-  'map file': { code: 'i2', label: 'map file' },
-  'pre released material': { code: 'pm', label: 'pre released material' },
-}
-
-const getCambridgeFilenameSessionCode = (seoSessionCode: string) =>
-  CAMBRIDGE_FILENAME_SESSION_CODES[seoSessionCode]
-
-const getCambridgeAvailableFiles = (
-  files: FilesDTO,
-  filenamePrefix: string,
-  paperVariantCode: string,
-) => {
-
-  const availableFiles: string[] = []
-
-  if (files.pdf.exist) {
-    availableFiles.push(
-      `question paper (QP) ${filenamePrefix}_qp_${paperVariantCode}`,
-    )
-  }
-
-  if (
-    files.answer.exist
-    && String(files.answer.ext).toLowerCase() !== 'word'
-  ) {
-    availableFiles.push(
-      `mark scheme (MS) ${filenamePrefix}_ms_${paperVariantCode}`,
-    )
-  }
-
-  const addedExtraFileCodes = new Set<string>()
-
-  for (const extraFile of files.extra ?? []) {
-    const normalizedTypeTitle = extraFile.type_title
-      ?.trim()
-      .toLowerCase()
-      .replaceAll('’', "'")
-
-    if (!normalizedTypeTitle) continue
-
-    const fileType = CAMBRIDGE_EXTRA_FILE_TYPES[normalizedTypeTitle]
-
-    if (!fileType || addedExtraFileCodes.has(fileType.code)) continue
-
-    availableFiles.push(
-      `${fileType.label} ${filenamePrefix}_${fileType.code}_${paperVariantCode}`,
-    )
-    addedExtraFileCodes.add(fileType.code)
-  }
-
-  return availableFiles.length > 0 ? availableFiles : null
-}
-
 const setMetaData = () => {
   if (!contentData.value) return
 
   const dto: PastPaperDTO = contentData.value
   const {
-    section,
-    base,
     section_title,
     base_title,
-    lesson_title,
-    test_type_title,
-    edu_year,
-    edu_month,
-    variant_title,
     title,
     is_paper,
   } = dto
@@ -398,53 +273,11 @@ const setMetaData = () => {
     pageTitle.value = `${baseTitle} past paper`
     pageDescribe.value = `Download ${baseTitle} past paper with mark scheme (MS). Access a full collection of past papers for study, revision, and exam practice.`
 
-    if (String(section) === String(CAMBRIDGE_BOARD_ID)) {
-      const subjectMatch = lesson_title
-        ?.trim()
-        .match(/^(.+?)\s*\((\d{4})\)$/)
-      const paperMatch = test_type_title
-        ?.trim()
-        .match(/^Paper\s+(\d+)$/)
-      const normalizedYear = edu_year?.trim() ?? ''
-      const session = CAMBRIDGE_SESSION_MAP[String(base)]?.[String(edu_month)]
-      const gradeTitle = base_title?.trim()
+    const cambridgeMeta = buildCambridgeMeta(dto)
 
-      if (
-        subjectMatch
-        && paperMatch
-        && /^\d{4}$/.test(normalizedYear)
-        && session
-        && gradeTitle
-      ) {
-        const [, subjectName, subjectCode] = subjectMatch
-        const paperNumber = paperMatch[1]
-        const normalizedVariantTitle = variant_title?.trim() ?? ''
-        const paperVariantCode = /^\d+$/.test(normalizedVariantTitle)
-          ? `${paperNumber}${normalizedVariantTitle}`
-          : paperNumber.padStart(2, '0')
-        const shortYear = normalizedYear.slice(-2)
-
-        pageTitle.value = `${pageTitle.value} ${subjectCode}/${paperVariantCode}/${session.code}/${shortYear}`
-
-        const currentCambridgeDescription = `Download Cambridge ${gradeTitle} ${subjectName} ${subjectCode}/${paperVariantCode} ${session.display} ${normalizedYear} question paper(QP) with mark scheme (MS) pdf. Access paper ${paperNumber}, ${subjectCode}/${paperVariantCode}/${session.code}/${shortYear} question paper pdf with answers for your upcoming exam series preparation.`
-
-        pageDescribe.value = currentCambridgeDescription
-
-        const filenameSessionCode = getCambridgeFilenameSessionCode(session.code)
-
-        if (filenameSessionCode) {
-          const filenamePrefix = `${subjectCode}_${filenameSessionCode}${shortYear}`
-          const availableFiles = getCambridgeAvailableFiles(
-            dto.files,
-            filenamePrefix,
-            paperVariantCode,
-          )
-
-          if (availableFiles) {
-            pageDescribe.value = `Download ${subjectCode}/${paperVariantCode}/${session.code}/${shortYear} Cambridge ${gradeTitle} ${subjectName.trim()} ${subjectCode}/${paperVariantCode} Paper ${paperNumber} ${session.display} ${normalizedYear} past paper. In this page you can find ${availableFiles.join(', ')} pdfs available for your upcoming exam series preparation.`
-          }
-        }
-      }
+    if (cambridgeMeta) {
+      pageTitle.value = `${pageTitle.value} ${cambridgeMeta.titleSuffix}`
+      pageDescribe.value = cambridgeMeta.description
     }
   }
   else {
