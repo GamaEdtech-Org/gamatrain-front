@@ -1,14 +1,6 @@
 <template>
   <v-container class="w-100 d-flex justify-center py-16">
     <div class="w-100 d-flex flex-column align-center justify-start ga-6 rounded-lg pa-6 pa-sm-10">
-      <div class="d-flex justify-center mb-2">
-        <img
-          src="/images/gamatrain-logo-black.svg"
-          alt="GamaTrain"
-          width="160"
-        >
-      </div>
-
       <v-progress-circular
         v-if="status === 'loading'"
         indeterminate
@@ -74,9 +66,9 @@ definePageMeta({
 })
 
 useSeoMeta({
-  title: 'Unsubscribe',
+  title: 'Unsubscribe from Email Notifications',
   description: 'Manage your GamaTrain email notification preferences.',
-  ogTitle: 'Unsubscribe',
+  ogTitle: 'Unsubscribe from Email Notifications',
   ogDescription: 'Manage your GamaTrain email notification preferences.',
 })
 
@@ -94,19 +86,19 @@ const statusContent = {
     iconColor: 'primary',
   },
   success: {
-    title: 'You are unsubscribed',
+    title: 'You\'ve unsubscribed from these emails',
     description: 'You will no longer receive these nudge email notifications from GamaTrain.',
     icon: 'md:check_circle',
     iconColor: 'success',
   },
   error: {
-    title: 'We could not unsubscribe you',
+    title: 'Invalid unsubscribe email link',
     description: 'This unsubscribe link is invalid or has expired.',
     icon: 'md:error',
     iconColor: 'error',
   },
   missingParams: {
-    title: 'Invalid unsubscribe link',
+    title: 'Invalid unsubscribe email link',
     description: 'This link is missing required information. Please use the unsubscribe link from your email.',
     icon: 'md:link_off',
     iconColor: 'error',
