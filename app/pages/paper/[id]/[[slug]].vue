@@ -55,6 +55,7 @@
           :alt="pageTitle"
           :views="contentData.views"
           :score="contentData.ref_score"
+          :q-file-pages="contentData.q_file_pages"
           @share="openShare = true"
         />
       </v-col>
@@ -175,6 +176,7 @@ const route = useRoute()
 const router = useRouter()
 const { user } = useUser()
 const { isAuthenticated } = useAuth()
+const { buildCambridgeMeta } = useCambridgeSeo()
 
 const { buildSchema } = useSeoSchema()
 
@@ -252,7 +254,12 @@ const setMetaData = () => {
   if (!contentData.value) return
 
   const dto: PastPaperDTO = contentData.value
-  const { section_title, base_title, title, is_paper } = dto
+  const {
+    section_title,
+    base_title,
+    title,
+    is_paper,
+  } = dto
 
   // Build title parts safely from DTO
   const titleParts = [
@@ -266,6 +273,13 @@ const setMetaData = () => {
   if (is_paper) {
     pageTitle.value = `${baseTitle} past paper`
     pageDescribe.value = `Download ${baseTitle} past paper with mark scheme (MS). Access a full collection of past papers for study, revision, and exam practice.`
+
+    const cambridgeMeta = buildCambridgeMeta(dto)
+
+    if (cambridgeMeta) {
+      pageTitle.value = `${pageTitle.value} ${cambridgeMeta.titleSuffix}`
+      pageDescribe.value = cambridgeMeta.description
+    }
   }
   else {
     pageTitle.value = baseTitle

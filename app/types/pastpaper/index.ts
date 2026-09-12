@@ -24,7 +24,9 @@ export interface PastPaperDTO {
   description: string
   views: number
   ref_score: number
+  q_file_pages?: string
   edu_year: string
+  edu_month: string
   section: string
   base: string
   lesson: string
@@ -45,6 +47,8 @@ export interface PastPaperDTO {
   answer_type: string
   up_date: string
   edu_month_title: string
+  variant: string | null
+  variant_title: string | null
   owner: boolean
   user_: string
 }
