@@ -191,21 +191,9 @@ const auth = useAuth()
 
 const items = computed(() => [
   {
-    title: 'Home',
-    icon: 'md:home_outlined',
-    value: 'home',
-    link: '/',
-  },
-  {
-    title: 'Dashboard',
-    icon: 'md:dashboard_outlined',
-    value: 'dashboard',
-    link: '/admin',
-  },
-  {
-    title: 'Caption',
-    icon: 'md:ballot_outlined',
-    value: 'caption',
+    title: 'Users',
+    icon: 'md:user_attributes_outlined',
+    value: 'users',
     subMenuList: [
       {
         title: 'Contact Us',
@@ -218,6 +206,13 @@ const items = computed(() => [
         icon: 'md:groups_3_outlined',
       },
       { title: 'Tags ', link: '/admin/tags', icon: 'md:sell_outlined' },
+    ],
+  },
+  {
+    title: 'Billing',
+    icon: 'md:add_card_outlined',
+    value: 'billing',
+    subMenuList: [
       {
         title: 'Transactions ',
         link: '/admin/transactions',
@@ -322,6 +317,18 @@ const items = computed(() => [
         icon: 'md:mark_email_read_outlined',
       },
     ],
+  },
+  {
+    title: 'Home',
+    icon: 'md:home_outlined',
+    value: 'home',
+    link: '/',
+  },
+  {
+    title: 'Dashboard',
+    icon: 'md:dashboard_outlined',
+    value: 'dashboard',
+    link: '/admin',
   },
 ])
 
